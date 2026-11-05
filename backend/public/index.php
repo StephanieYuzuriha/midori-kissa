@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Controllers\HealthController;
+use App\Core\Response;
+use App\Core\Router;
+
+// Load App classes from their folder: App\Core\Router -> backend/Core/Router.php
+spl_autoload_register(function (string $class): void {
+    $prefix = 'App\\';
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+
+    $file = __DIR__ . '/../' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+    if (is_file($file)) {
+        require $file;
+    }
+});
+
+$router = new Router();
+$router->get('/health', [HealthController::class, 'index']);
+
+try {
+    $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+} catch (Throwable $e) {
+    // Log the real error and show a generic message (RS18)
+    error_log($e->getMessage());
+    Response::error('Error interno del servidor', 500);
+}
