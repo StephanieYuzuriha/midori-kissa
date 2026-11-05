@@ -26,6 +26,15 @@ Tienda online de matcha y té japonés. Proyecto final del CFGS Desarrollo de Ap
 
    El certificado es autofirmado, así que el navegador mostrará un aviso la primera vez; hay que aceptarlo para continuar. Las peticiones a `http://localhost` se redirigen a HTTPS.
 
+## Usuarios de prueba
+
+El script SQL crea dos usuarias para probar la aplicación. No son credenciales reales.
+
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administradora | admin@midorikissa.test | Admin1234 |
+| Clienta | cliente@midorikissa.test | Cliente1234 |
+
 ## Uso en GitHub Codespaces
 
 Tras `docker compose up -d --build`, en la pestaña **Puertos** se abre el puerto **443** y se cambia su protocolo a **HTTPS** (clic derecho → *Change Port Protocol*).
@@ -58,7 +67,8 @@ La aplicación queda en el puerto 4200. Para ver los cambios en `https://localho
 backend/
   config/       configuración (lee las variables de entorno del .env)
   Controllers/  controladores de la API
-  Core/         clases base: Database, Router, Response
+  Core/         clases base: Database, Router, Response, Controller, Auth y Csrf
+  Models/       modelos que acceden a la base de datos
   public/       punto de entrada de la API (index.php)
 database/       script SQL
 docker/apache/  configuración de Apache (HTTP → HTTPS y alias /api)

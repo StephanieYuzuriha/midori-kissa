@@ -96,3 +96,8 @@ INSERT INTO categories (name, description) VALUES
     ('Matcha culinario', 'Matcha para lattes, repostería y cocina.'),
     ('Otros tés', 'Sencha, hojicha, genmaicha y otros tés japoneses.'),
     ('Utensilios', 'Chasen, chawan, chashaku y accesorios para preparar el té.');
+
+-- Test users (passwords in the README; they are not real credentials)
+INSERT INTO users (first_name, last_name, email, password_hash, phone, role, address, postal_code, city, province) VALUES
+    ('Aiko', 'Martínez Sato', 'admin@midorikissa.test', '$2y$10$qUchhLBzYxO7x7zYasMHZOk6BRCOhBPx39pYFWpM6oRxQWaC3y2li', '600000001', 'admin', NULL, NULL, NULL, NULL),
+    ('Lucía', 'Pérez Gómez', 'cliente@midorikissa.test', '$2y$10$JtlZWHRmoQ94t2Ydu2SFr.INTssTUPuqZEPqhSnwP0PZHBFt87rVu', '600000002', 'customer', 'C/ Ardigales 5, 1.º A', '39700', 'Castro Urdiales', 'Cantabria');
