@@ -19,8 +19,19 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+// Session cookie: HttpOnly, only over HTTPS and deleted when the browser closes (RS4, RS5)
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+session_start();
+
 $router = new Router();
-$router->get('/health', [HealthController::class, 'index']);
+$router->add('GET', '/health', HealthController::class, 'index');
 
 try {
     $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

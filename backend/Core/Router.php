@@ -11,9 +11,9 @@ class Router
     // Routes grouped by HTTP method: ['GET' => ['/health' => [Controller::class, 'method']]]
     private array $routes = [];
 
-    public function get(string $path, array $handler): void
+    public function add(string $method, string $path, string $controller, string $action): void
     {
-        $this->routes['GET'][$path] = $handler;
+        $this->routes[$method][$path] = [$controller, $action];
     }
 
     public function dispatch(string $method, string $uri): void
