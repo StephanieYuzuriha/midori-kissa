@@ -1,3 +1,12 @@
+# Stage 1: build the Angular app with Node.js
+FROM node:22-alpine AS frontend
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# Stage 2: Apache + PHP serving the Angular app and the API
 FROM php:8.3-apache
 
 # PHP extension for MySQL and Apache modules
@@ -15,3 +24,4 @@ RUN openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
 
 COPY docker/apache/midori-kissa.conf /etc/apache2/sites-available/000-default.conf
 COPY backend /var/www/backend
+COPY --from=frontend /app/dist/frontend/browser /var/www/html
