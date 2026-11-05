@@ -22,13 +22,25 @@ Tienda online de matcha y té japonés. Proyecto final del CFGS Desarrollo de Ap
    docker compose up -d --build
    ```
 
-3. Comprobar que la API y la base de datos funcionan en <https://localhost/api/health>. Debe devolver `{"status":"ok"}`.
+3. Abrir la tienda en <https://localhost>. Para comprobar que la API y la base de datos funcionan, <https://localhost/api/health> debe devolver `{"status":"ok"}`.
 
    El certificado es autofirmado, así que el navegador mostrará un aviso la primera vez; hay que aceptarlo para continuar. Las peticiones a `http://localhost` se redirigen a HTTPS.
 
 ## Uso en GitHub Codespaces
 
-Tras `docker compose up -d --build`, en la pestaña **Puertos** se abre el puerto **443**, se cambia su protocolo a **HTTPS** (clic derecho → *Change Port Protocol*) y se añade `/api/health` a la dirección.
+Tras `docker compose up -d --build`, en la pestaña **Puertos** se abre el puerto **443** y se cambia su protocolo a **HTTPS** (clic derecho → *Change Port Protocol*).
+
+## Desarrollo del frontend
+
+Con los contenedores arrancados, el servidor de desarrollo de Angular recarga los cambios al momento y redirige las llamadas a `/api` hacia el contenedor web:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+La aplicación queda en el puerto 4200. Para ver los cambios en `https://localhost` hay que volver a construir la imagen con `docker compose up -d --build`.
 
 ## Base de datos
 
@@ -50,4 +62,5 @@ backend/
   public/       punto de entrada de la API (index.php)
 database/       script SQL
 docker/apache/  configuración de Apache (HTTP → HTTPS y alias /api)
+frontend/       aplicación Angular con Bootstrap
 ```
