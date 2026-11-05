@@ -13,7 +13,9 @@ services:
       # Mount the backend so code changes are visible without rebuilding
       - ./backend:/var/www/backend
     depends_on:
-      - db
+      # Wait until MySQL accepts connections
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8.0
@@ -26,6 +28,11 @@ services:
       - db_data:/var/lib/mysql
       # The SQL script runs only the first time the volume is created
       - ./database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   db_data:
