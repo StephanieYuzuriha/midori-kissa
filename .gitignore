@@ -1,14 +1,10 @@
-# --- Configuracion y secretos (RS17) ---
+# --- Configuración y secretos (RS17) ---
 .env
-backend/config/config.php
-!backend/config/config.example.php
 
-# --- PHP ---
-backend/vendor/
-backend/logs/
+# --- Logs ---
 *.log
 
-# --- Imagenes subidas desde el panel ---
+# --- Imágenes subidas desde el panel ---
 backend/uploads/*
 !backend/uploads/.gitkeep
 
