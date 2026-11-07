@@ -1,0 +1,27 @@
+<header class="border-bottom">
+  <nav class="navbar navbar-expand bg-body" aria-label="Principal">
+    <div class="container">
+      <a class="navbar-brand" routerLink="/">Midori Kissa</a>
+
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        @if (auth.user(); as user) {
+          <li class="nav-item">
+            <span class="navbar-text">Hola, {{ user.firstName }}</span>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
+              Cerrar sesión
+            </button>
+          </li>
+        } @else {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/iniciar-sesion">Iniciar sesión</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm" routerLink="/crear-cuenta">Crear cuenta</a>
+          </li>
+        }
+      </ul>
+    </div>
+  </nav>
+</header>
