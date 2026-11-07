@@ -11,6 +11,9 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    // Same message whether the email does not exist, the password is wrong or the account is locked
+    private const LOGIN_ERROR = 'Email o contraseña incorrectos. Tras 5 intentos fallidos seguidos, si la cuenta existe, se bloquea durante 15 minutos.';
+
     // Tells the frontend who is logged in and gives it the CSRF token
     public function session(): void
     {
@@ -76,22 +79,14 @@ class AuthController extends Controller
         }
 
         $user = User::findByEmail(mb_strtolower(trim($data['email'])));
+        $canLogin = $user !== null && !$user->isLocked() && $user->verifyPassword($data['password']);
 
-        if ($user !== null && $user->isLocked()) {
-            $this->respondLocked();
-            return;
-        }
-
-        if ($user === null || !$user->verifyPassword($data['password'])) {
-            if ($user !== null) {
+        if (!$canLogin) {
+            // Only count the attempt if the account exists and is not locked yet (RS3)
+            if ($user !== null && !$user->isLocked()) {
                 $user->registerFailedAttempt();
-                if ($user->isLocked()) {
-                    $this->respondLocked();
-                    return;
-                }
             }
-            // Same message whether the email exists or not
-            Response::error('Email o contraseña incorrectos.', 401);
+            Response::error(self::LOGIN_ERROR, 401);
             return;
         }
 
@@ -104,21 +99,5 @@ class AuthController extends Controller
     {
         $this->auth->logout();
         Response::json(['message' => 'Sesión cerrada.']);
-    }
-
-    private function respondLocked(): void
-    {
-        Response::error(
-            'La cuenta está bloqueada durante 15 minutos por varios intentos fallidos. Inténtalo más tarde.',
-            423
-        );
-    }
-
-    // Empty optional fields are stored as NULL
-    private function optionalText(array $data, string $field): ?string
-    {
-        $value = trim($data[$field] ?? '');
-
-        return $value === '' ? null : $value;
     }
 }

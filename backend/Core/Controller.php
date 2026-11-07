@@ -29,6 +29,14 @@ abstract class Controller
         return is_array($data) ? $data : [];
     }
 
+    // Empty optional fields are stored as NULL
+    protected function optionalText(array $data, string $field): ?string
+    {
+        $value = trim($data[$field] ?? '');
+
+        return $value === '' ? null : $value;
+    }
+
     /**
      * Checks the data against simple rules and returns the errors by field.
      * Example: ['email' => ['required', 'email', 'max:150']]
