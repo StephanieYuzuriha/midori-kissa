@@ -70,6 +70,7 @@ backend/
   Core/         clases base: Database, Router, Response, Controller, Auth y Csrf
   Models/       modelos que acceden a la base de datos
   public/       punto de entrada de la API (index.php)
+  routes.php    rutas de la API
 database/       script SQL
 docker/apache/  configuración de Apache (HTTP → HTTPS y alias /api)
 frontend/       aplicación Angular con Bootstrap

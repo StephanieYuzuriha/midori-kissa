@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Controllers\AuthController;
-use App\Controllers\HealthController;
 use App\Core\Response;
 use App\Core\Router;
 
@@ -31,13 +29,9 @@ session_set_cookie_params([
 ]);
 session_start();
 
+// The list of routes is in backend/routes.php
 $router = new Router();
-$router->add('GET', '/health', HealthController::class, 'index');
-
-$router->add('GET', '/auth/session', AuthController::class, 'session');
-$router->add('POST', '/auth/register', AuthController::class, 'register');
-$router->add('POST', '/auth/login', AuthController::class, 'login');
-$router->add('POST', '/auth/logout', AuthController::class, 'logout');
+require __DIR__ . '/../routes.php';
 
 try {
     $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
