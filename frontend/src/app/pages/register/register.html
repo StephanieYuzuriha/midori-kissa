@@ -1,0 +1,102 @@
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <h1 class="h2 mb-4">Crear cuenta</h1>
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">
+        {{ errorMessage() }}
+        @if (emailExists()) {
+          <a routerLink="/iniciar-sesion" class="alert-link">Ir a iniciar sesión</a>
+        }
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="row">
+        <div class="col-sm-6 mb-3">
+          <label for="firstName" class="form-label">Nombre</label>
+          <input
+            id="firstName"
+            type="text"
+            class="form-control"
+            formControlName="firstName"
+            autocomplete="given-name"
+            [class.is-invalid]="isInvalid('firstName')"
+            [attr.aria-invalid]="isInvalid('firstName')"
+            [attr.aria-describedby]="isInvalid('firstName') ? 'firstName-error' : null"
+          />
+          @if (isInvalid('firstName')) {
+            <div id="firstName-error" class="invalid-feedback">{{ errorFor('firstName') }}</div>
+          }
+        </div>
+
+        <div class="col-sm-6 mb-3">
+          <label for="lastName" class="form-label">Apellidos</label>
+          <input
+            id="lastName"
+            type="text"
+            class="form-control"
+            formControlName="lastName"
+            autocomplete="family-name"
+            [class.is-invalid]="isInvalid('lastName')"
+            [attr.aria-invalid]="isInvalid('lastName')"
+            [attr.aria-describedby]="isInvalid('lastName') ? 'lastName-error' : null"
+          />
+          @if (isInvalid('lastName')) {
+            <div id="lastName-error" class="invalid-feedback">{{ errorFor('lastName') }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          formControlName="email"
+          autocomplete="email"
+          [class.is-invalid]="isInvalid('email')"
+          [attr.aria-invalid]="isInvalid('email')"
+          [attr.aria-describedby]="isInvalid('email') ? 'email-error' : null"
+        />
+        @if (isInvalid('email')) {
+          <div id="email-error" class="invalid-feedback">{{ errorFor('email') }}</div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          autocomplete="new-password"
+          [class.is-invalid]="isInvalid('password')"
+          [attr.aria-invalid]="isInvalid('password')"
+          [attr.aria-describedby]="isInvalid('password') ? 'password-error password-help' : 'password-help'"
+        />
+        @if (isInvalid('password')) {
+          <div id="password-error" class="invalid-feedback">{{ errorFor('password') }}</div>
+        }
+        <div id="password-help" class="form-text">Al menos 8 caracteres, con una letra y un número.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading()">
+        {{ isLoading() ? 'Creando la cuenta…' : 'Crear cuenta' }}
+      </button>
+
+      <!-- Information about personal data (RS19) -->
+      <p class="form-text mt-3">
+        Al crear la cuenta, Midori Kissa tratará tus datos para gestionar tu cuenta y tus pedidos.
+        Puedes consultar cómo los tratamos y cómo ejercer tus derechos en la
+        <a routerLink="/politica-de-privacidad">política de privacidad</a>.
+      </p>
+    </form>
+
+    <p class="mt-4 text-center">
+      ¿Ya tienes cuenta? <a routerLink="/iniciar-sesion">Iniciar sesión</a>
+    </p>
+  </div>
+</div>

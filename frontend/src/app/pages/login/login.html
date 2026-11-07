@@ -1,0 +1,53 @@
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <h1 class="h2 mb-4">Iniciar sesión</h1>
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          formControlName="email"
+          autocomplete="email"
+          [class.is-invalid]="isInvalid('email')"
+          [attr.aria-invalid]="isInvalid('email')"
+          [attr.aria-describedby]="isInvalid('email') ? 'email-error' : null"
+        />
+        @if (isInvalid('email')) {
+          <div id="email-error" class="invalid-feedback">{{ errorFor('email') }}</div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          autocomplete="current-password"
+          [class.is-invalid]="isInvalid('password')"
+          [attr.aria-invalid]="isInvalid('password')"
+          [attr.aria-describedby]="isInvalid('password') ? 'password-error' : null"
+        />
+        @if (isInvalid('password')) {
+          <div id="password-error" class="invalid-feedback">{{ errorFor('password') }}</div>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading()">
+        {{ isLoading() ? 'Entrando…' : 'Iniciar sesión' }}
+      </button>
+    </form>
+
+    <p class="mt-4 text-center">
+      ¿No tienes cuenta? <a routerLink="/crear-cuenta">Crear cuenta</a>
+    </p>
+  </div>
+</div>

@@ -1,1 +1,20 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles. Colors from the Midori Kissa palette */
+:root {
+  --mk-green: #4a6328;
+  --mk-vermilion: #a8402a;
+
+  /* Form errors in vermilion (RI9) */
+  --bs-form-invalid-color: var(--mk-vermilion);
+  --bs-form-invalid-border-color: var(--mk-vermilion);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--mk-green);
+  --bs-btn-border-color: var(--mk-green);
+  --bs-btn-hover-bg: #3c5020;
+  --bs-btn-hover-border-color: #3c5020;
+  --bs-btn-active-bg: #33441b;
+  --bs-btn-active-border-color: #33441b;
+  --bs-btn-disabled-bg: var(--mk-green);
+  --bs-btn-disabled-border-color: var(--mk-green);
+}
