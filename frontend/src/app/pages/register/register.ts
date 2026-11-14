@@ -3,7 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { getFieldError, getRequestError, passwordValidator } from '../../shared/form-messages';
+import {
+  getFieldError,
+  getRequestError,
+  passwordValidator,
+  setServerErrors,
+} from '../../shared/form-messages';
 
 // "Crear cuenta" page (RF4). Same length limits as the backend
 @Component({
@@ -58,10 +63,7 @@ export class Register {
 
   private showErrors(error: HttpErrorResponse): void {
     // Errors of each field, checked again in the server (RS9)
-    if (error.status === 422 && error.error?.errors) {
-      for (const [field, message] of Object.entries(error.error.errors)) {
-        this.form.get(field)?.setErrors({ server: message });
-      }
+    if (setServerErrors(this.form, error)) {
       return;
     }
 

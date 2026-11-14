@@ -1,0 +1,163 @@
+<div class="mx-auto" style="max-width: 48rem">
+  <h1 class="h2 mb-4">Mi cuenta</h1>
+
+  @if (isLoading()) {
+    <p role="status">Cargando tus datos…</p>
+  } @else if (loadError()) {
+    <div class="alert alert-danger" role="alert">{{ loadError() }}</div>
+  } @else {
+    <!-- Personal data and shipping address (RF8, RF9) -->
+    <section class="card mb-4" aria-labelledby="profile-title">
+      <div class="card-body">
+        <h2 id="profile-title" class="h5 mb-3">Datos personales y dirección de envío</h2>
+
+        @if (profileError()) {
+          <div class="alert alert-danger" role="alert">{{ profileError() }}</div>
+        }
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <label for="firstName" class="form-label">Nombre</label>
+              <input
+                id="firstName"
+                type="text"
+                class="form-control"
+                formControlName="firstName"
+                autocomplete="given-name"
+                [class.is-invalid]="isInvalid(profileForm, 'firstName')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'firstName')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'firstName') ? 'firstName-error' : null"
+              />
+              @if (isInvalid(profileForm, 'firstName')) {
+                <div id="firstName-error" class="invalid-feedback">{{ errorFor(profileForm, 'firstName') }}</div>
+              }
+            </div>
+
+            <div class="col-sm-6 mb-3">
+              <label for="lastName" class="form-label">Apellidos</label>
+              <input
+                id="lastName"
+                type="text"
+                class="form-control"
+                formControlName="lastName"
+                autocomplete="family-name"
+                [class.is-invalid]="isInvalid(profileForm, 'lastName')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'lastName')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'lastName') ? 'lastName-error' : null"
+              />
+              @if (isInvalid(profileForm, 'lastName')) {
+                <div id="lastName-error" class="invalid-feedback">{{ errorFor(profileForm, 'lastName') }}</div>
+              }
+            </div>
+
+            <div class="col-sm-6 mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                [value]="email()"
+                readonly
+                aria-describedby="email-help"
+              />
+              <div id="email-help" class="form-text">El email no se puede cambiar: es tu usuario para iniciar sesión.</div>
+            </div>
+
+            <div class="col-sm-6 mb-3">
+              <label for="phone" class="form-label">Teléfono</label>
+              <input
+                id="phone"
+                type="tel"
+                class="form-control"
+                formControlName="phone"
+                autocomplete="tel"
+                [class.is-invalid]="isInvalid(profileForm, 'phone')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'phone')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'phone') ? 'phone-error' : null"
+              />
+              @if (isInvalid(profileForm, 'phone')) {
+                <div id="phone-error" class="invalid-feedback">{{ errorFor(profileForm, 'phone') }}</div>
+              }
+            </div>
+
+            <div class="col-12 mb-3">
+              <label for="address" class="form-label">Dirección</label>
+              <input
+                id="address"
+                type="text"
+                class="form-control"
+                formControlName="address"
+                autocomplete="street-address"
+                [class.is-invalid]="isInvalid(profileForm, 'address')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'address')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'address') ? 'address-error' : null"
+              />
+              @if (isInvalid(profileForm, 'address')) {
+                <div id="address-error" class="invalid-feedback">{{ errorFor(profileForm, 'address') }}</div>
+              }
+            </div>
+
+            <div class="col-sm-4 mb-3">
+              <label for="postalCode" class="form-label">Código postal</label>
+              <input
+                id="postalCode"
+                type="text"
+                class="form-control"
+                formControlName="postalCode"
+                autocomplete="postal-code"
+                [class.is-invalid]="isInvalid(profileForm, 'postalCode')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'postalCode')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'postalCode') ? 'postalCode-error' : null"
+              />
+              @if (isInvalid(profileForm, 'postalCode')) {
+                <div id="postalCode-error" class="invalid-feedback">{{ errorFor(profileForm, 'postalCode') }}</div>
+              }
+            </div>
+
+            <div class="col-sm-4 mb-3">
+              <label for="city" class="form-label">Ciudad</label>
+              <input
+                id="city"
+                type="text"
+                class="form-control"
+                formControlName="city"
+                autocomplete="address-level2"
+                [class.is-invalid]="isInvalid(profileForm, 'city')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'city')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'city') ? 'city-error' : null"
+              />
+              @if (isInvalid(profileForm, 'city')) {
+                <div id="city-error" class="invalid-feedback">{{ errorFor(profileForm, 'city') }}</div>
+              }
+            </div>
+
+            <div class="col-sm-4 mb-3">
+              <label for="province" class="form-label">Provincia</label>
+              <input
+                id="province"
+                type="text"
+                class="form-control"
+                formControlName="province"
+                autocomplete="address-level1"
+                [class.is-invalid]="isInvalid(profileForm, 'province')"
+                [attr.aria-invalid]="isInvalid(profileForm, 'province')"
+                [attr.aria-describedby]="isInvalid(profileForm, 'province') ? 'province-error' : null"
+              />
+              @if (isInvalid(profileForm, 'province')) {
+                <div id="province-error" class="invalid-feedback">{{ errorFor(profileForm, 'province') }}</div>
+              }
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button type="submit" class="btn btn-primary" [disabled]="isSavingProfile()">
+              {{ isSavingProfile() ? 'Guardando…' : 'Guardar datos' }}
+            </button>
+            <span class="text-success" role="status">{{ profileMessage() }}</span>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
+</div>

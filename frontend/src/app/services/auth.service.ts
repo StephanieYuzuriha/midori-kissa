@@ -24,6 +24,17 @@ export interface RegisterData {
   password: string;
 }
 
+// Data that the customer can change in "Mi cuenta" (the email and the role cannot be changed)
+export interface ProfileData {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  postalCode: string;
+  city: string;
+  province: string;
+}
+
 // Maximum wait for the session when the app starts, so the shop never stays blocked
 const SESSION_TIMEOUT_MS = 5000;
 
@@ -32,6 +43,7 @@ const SESSION_TIMEOUT_MS = 5000;
 export class AuthService {
   private http = inject(HttpClient);
   private apiUrl = '/api/auth';
+  private profileUrl = '/api/users/me';
 
   // Logged-in user, or null if nobody is logged in
   readonly user = signal<User | null>(null);
@@ -66,6 +78,21 @@ export class AuthService {
 
   register(data: RegisterData): Observable<User> {
     return this.http.post<UserResponse>(`${this.apiUrl}/register`, data).pipe(
+      map((response) => response.user),
+      tap((user) => this.user.set(user)),
+    );
+  }
+
+  getProfile(): Observable<User> {
+    return this.http.get<UserResponse>(this.profileUrl).pipe(
+      map((response) => response.user),
+      tap((user) => this.user.set(user)),
+    );
+  }
+
+  // Updating the user signal also updates the name in the header
+  updateProfile(data: ProfileData): Observable<User> {
+    return this.http.put<UserResponse>(this.profileUrl, data).pipe(
       map((response) => response.user),
       tap((user) => this.user.set(user)),
     );

@@ -9,6 +9,9 @@
             <span class="navbar-text">Hola, {{ user.firstName }}</span>
           </li>
           <li class="nav-item">
+            <a class="nav-link" routerLink="/mi-cuenta">Mi cuenta</a>
+          </li>
+          <li class="nav-item">
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
               Cerrar sesión
             </button>

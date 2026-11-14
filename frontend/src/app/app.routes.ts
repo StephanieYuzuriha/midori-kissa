@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
+import { Account } from './pages/account/account';
 import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { PrivacyPolicy } from './pages/privacy-policy/privacy-policy';
@@ -9,6 +11,7 @@ export const routes: Routes = [
   { path: '', component: Home, title: 'Midori Kissa | Matcha y té japonés' },
   { path: 'iniciar-sesion', component: Login, title: 'Iniciar sesión | Midori Kissa' },
   { path: 'crear-cuenta', component: Register, title: 'Crear cuenta | Midori Kissa' },
+  { path: 'mi-cuenta', component: Account, canActivate: [authGuard], title: 'Mi cuenta | Midori Kissa' },
   { path: 'politica-de-privacidad', component: PrivacyPolicy, title: 'Política de privacidad | Midori Kissa' },
   { path: '**', redirectTo: '' },
 ];

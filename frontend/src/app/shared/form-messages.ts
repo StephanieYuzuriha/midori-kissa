@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormGroup, ValidationErrors } from '@angular/forms';
 
 const PASSWORD_MIN_LENGTH = 8;
 
@@ -12,6 +12,12 @@ export function passwordValidator(control: AbstractControl): ValidationErrors | 
 
   const isValid = value.length >= PASSWORD_MIN_LENGTH && /[A-Za-z]/.test(value) && /[0-9]/.test(value);
   return isValid ? null : { password: true };
+}
+
+// Same postal code rule as the backend: 5 digits. Empty is allowed because the field is optional
+export function postalCodeValidator(control: AbstractControl): ValidationErrors | null {
+  const value: string = control.value ?? '';
+  return value === '' || /^[0-9]{5}$/.test(value) ? null : { postalCode: true };
 }
 
 // Message shown under a form field, with the same texts as the backend
@@ -32,11 +38,29 @@ export function getFieldError(control: AbstractControl | null): string {
   if (errors['password']) {
     return 'La contraseña debe tener al menos 8 caracteres, una letra y un número.';
   }
+  if (errors['postalCode']) {
+    return 'El código postal debe tener 5 cifras.';
+  }
   // Error sent by the API for this field (422)
   if (errors['server']) {
     return errors['server'];
   }
   return 'El valor no es válido.';
+}
+
+// Shows the errors that the API sends for each field (422) under the matching form field.
+// Returns false if the error is not a validation error.
+export function setServerErrors(form: FormGroup, error: HttpErrorResponse): boolean {
+  if (error.status !== 422 || !error.error?.errors) {
+    return false;
+  }
+
+  for (const [field, message] of Object.entries(error.error.errors)) {
+    const control = form.get(field);
+    control?.setErrors({ server: message });
+    control?.markAsTouched();
+  }
+  return true;
 }
 
 // Message shown when a request to the API fails
