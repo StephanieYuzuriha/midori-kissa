@@ -159,5 +159,64 @@
         </form>
       </div>
     </section>
+
+    <!-- Password change (RF8, RS2) -->
+    <section class="card mb-4" aria-labelledby="password-title">
+      <div class="card-body">
+        <h2 id="password-title" class="h5 mb-3">Cambiar contraseña</h2>
+
+        @if (passwordError()) {
+          <div class="alert alert-danger" role="alert">{{ passwordError() }}</div>
+        }
+
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <label for="currentPassword" class="form-label">Contraseña actual</label>
+              <input
+                id="currentPassword"
+                type="password"
+                class="form-control"
+                formControlName="currentPassword"
+                autocomplete="current-password"
+                [class.is-invalid]="isInvalid(passwordForm, 'currentPassword')"
+                [attr.aria-invalid]="isInvalid(passwordForm, 'currentPassword')"
+                [attr.aria-describedby]="isInvalid(passwordForm, 'currentPassword') ? 'currentPassword-error' : null"
+              />
+              @if (isInvalid(passwordForm, 'currentPassword')) {
+                <div id="currentPassword-error" class="invalid-feedback">
+                  {{ errorFor(passwordForm, 'currentPassword') }}
+                </div>
+              }
+            </div>
+
+            <div class="col-sm-6 mb-3">
+              <label for="newPassword" class="form-label">Contraseña nueva</label>
+              <input
+                id="newPassword"
+                type="password"
+                class="form-control"
+                formControlName="newPassword"
+                autocomplete="new-password"
+                [class.is-invalid]="isInvalid(passwordForm, 'newPassword')"
+                [attr.aria-invalid]="isInvalid(passwordForm, 'newPassword')"
+                [attr.aria-describedby]="isInvalid(passwordForm, 'newPassword') ? 'newPassword-error newPassword-help' : 'newPassword-help'"
+              />
+              @if (isInvalid(passwordForm, 'newPassword')) {
+                <div id="newPassword-error" class="invalid-feedback">{{ errorFor(passwordForm, 'newPassword') }}</div>
+              }
+              <div id="newPassword-help" class="form-text">Al menos 8 caracteres, con una letra y un número.</div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button type="submit" class="btn btn-primary" [disabled]="isSavingPassword()">
+              {{ isSavingPassword() ? 'Guardando…' : 'Cambiar contraseña' }}
+            </button>
+            <span class="text-success" role="status">{{ passwordMessage() }}</span>
+          </div>
+        </form>
+      </div>
+    </section>
   }
 </div>

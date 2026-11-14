@@ -35,6 +35,11 @@ export interface ProfileData {
   province: string;
 }
 
+export interface PasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 // Maximum wait for the session when the app starts, so the shop never stays blocked
 const SESSION_TIMEOUT_MS = 5000;
 
@@ -96,6 +101,10 @@ export class AuthService {
       map((response) => response.user),
       tap((user) => this.user.set(user)),
     );
+  }
+
+  changePassword(data: PasswordData): Observable<void> {
+    return this.http.put<void>(`${this.profileUrl}/password`, data);
   }
 
   // The server destroys the session, so afterwards we ask for a new one (with a new CSRF token)

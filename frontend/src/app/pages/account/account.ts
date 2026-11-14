@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import {
   getFieldError,
   getRequestError,
+  passwordValidator,
   postalCodeValidator,
   setServerErrors,
 } from '../../shared/form-messages';
@@ -14,7 +15,7 @@ import {
 // Time that a success message stays on screen (RI10)
 const SUCCESS_MESSAGE_MS = 4000;
 
-// "Mi cuenta" page: personal data and shipping address (RF8, RF9).
+// "Mi cuenta" page: personal data, shipping address and password (RF8, RF9).
 // Same length limits as the backend
 @Component({
   selector: 'app-account',
@@ -43,6 +44,15 @@ export class Account implements OnInit {
   protected profileMessage = signal('');
   protected profileError = signal('');
   protected isSavingProfile = signal(false);
+
+  // Password change, in its own form so that the validation of one form does not affect the other
+  protected passwordForm = this.fb.group({
+    currentPassword: ['', Validators.required],
+    newPassword: ['', [Validators.required, passwordValidator]],
+  });
+  protected passwordMessage = signal('');
+  protected passwordError = signal('');
+  protected isSavingPassword = signal(false);
 
   // The data comes from the API, so the page always shows what is saved in the database
   ngOnInit(): void {
@@ -92,6 +102,32 @@ export class Account implements OnInit {
           return;
         }
         this.profileError.set(getRequestError(error));
+      },
+    });
+  }
+
+  changePassword(): void {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSavingPassword.set(true);
+    this.passwordError.set('');
+
+    this.auth.changePassword(this.passwordForm.getRawValue()).subscribe({
+      next: () => {
+        // Clear the fields after a successful change
+        this.passwordForm.reset();
+        this.showSuccess(this.passwordMessage, 'Contraseña actualizada.');
+        this.isSavingPassword.set(false);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isSavingPassword.set(false);
+        if (this.handleExpiredSession(error) || setServerErrors(this.passwordForm, error)) {
+          return;
+        }
+        this.passwordError.set(getRequestError(error));
       },
     });
   }
