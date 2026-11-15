@@ -3,7 +3,13 @@
     <div class="container">
       <a class="navbar-brand" routerLink="/">Midori Kissa</a>
 
-      <ul class="navbar-nav ms-auto align-items-center gap-2">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/tienda" routerLinkActive="active" ariaCurrentWhenActive="page">Tienda</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav align-items-center gap-2">
         @if (auth.user(); as user) {
           <li class="nav-item">
             <span class="navbar-text">Hola, {{ user.firstName }}</span>
