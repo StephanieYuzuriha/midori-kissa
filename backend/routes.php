@@ -6,7 +6,9 @@ declare(strict_types=1);
 // This file is loaded from public/index.php, which creates $router.
 
 use App\Controllers\AuthController;
+use App\Controllers\CategoryController;
 use App\Controllers\HealthController;
+use App\Controllers\ProductController;
 use App\Controllers\UserController;
 
 /** @var App\Core\Router $router */
@@ -23,3 +25,8 @@ $router->add('POST', '/auth/logout', AuthController::class, 'logout');
 $router->add('GET', '/users/me', UserController::class, 'getProfile');
 $router->add('PUT', '/users/me', UserController::class, 'updateProfile');
 $router->add('PUT', '/users/me/password', UserController::class, 'changePassword');
+
+// Catalog
+$router->add('GET', '/categories', CategoryController::class, 'index');
+$router->add('GET', '/products', ProductController::class, 'index');
+$router->add('GET', '/products/{id}', ProductController::class, 'show');
