@@ -35,6 +35,10 @@ El script SQL crea dos usuarias para probar la aplicación. No son credenciales 
 | Administradora | admin@midorikissa.test | Admin1234 |
 | Clienta | cliente@midorikissa.test | Cliente1234 |
 
+## Productos de prueba
+
+El script SQL también crea 15 productos repartidos en las 4 categorías, entre ellos los utensilios para preparar matcha: 14 a la venta (tres de ellos agotados) y uno retirado. Sus imágenes son provisionales y están en `frontend/public/images/products`; se sustituirán por fotografías definitivas desde el panel de administración.
+
 ## Uso en GitHub Codespaces
 
 Tras `docker compose up -d --build`, en la pestaña **Puertos** se abre el puerto **443** y se cambia su protocolo a **HTTPS** (clic derecho → *Change Port Protocol*).
