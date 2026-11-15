@@ -1,0 +1,115 @@
+<h1 class="h2 mb-4">Tienda</h1>
+
+<!-- Filters (RF11, RF12, RF13) -->
+<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="row g-3 align-items-end mb-4" role="search">
+  <div class="col-md-4">
+    <label for="category" class="form-label">Categoría</label>
+    <select id="category" class="form-select" formControlName="category">
+      <option value="">Todas</option>
+      @for (category of categories(); track category.id) {
+        <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <label for="search" class="form-label">Buscar por nombre</label>
+    <div class="input-group">
+      <input id="search" type="search" class="form-control" formControlName="search" maxlength="100" />
+      <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <label for="sort" class="form-label">Ordenar por</label>
+    <select id="sort" class="form-select" formControlName="sort">
+      @for (option of sortOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+</form>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    {{ errorMessage() }}
+    <a routerLink="/tienda" class="alert-link">Ver todos los productos</a>
+  </div>
+} @else if (isLoading()) {
+  <p role="status">Cargando productos…</p>
+} @else if (products().length === 0) {
+  <div class="text-center py-5">
+    <p class="lead">
+      {{ total() === 0 ? 'No hay productos que coincidan con tu búsqueda.' : 'Esta página no tiene productos.' }}
+    </p>
+    <a routerLink="/tienda" class="btn btn-outline-secondary">Ver todos los productos</a>
+  </div>
+} @else {
+  <p class="text-body-secondary" role="status">{{ total() }} {{ total() === 1 ? 'producto' : 'productos' }}</p>
+
+  <!-- 1 product per row on mobile, 2 on tablet and 4 on desktop (RI3) -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+    @for (product of products(); track product.id) {
+      <div class="col">
+        <!-- Card with photo, name, grade and price (RI5) -->
+        <article class="card h-100">
+          <div class="ratio ratio-1x1 bg-body-tertiary">
+            @if (product.image) {
+              <img [src]="product.image" [alt]="product.name" class="card-img-top" loading="lazy" />
+            }
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h2 class="h6 card-title">{{ product.name }}</h2>
+            @if (product.grade) {
+              <p class="small text-body-secondary mb-2">{{ gradeLabels[product.grade] }}</p>
+            }
+            <p class="fw-semibold mt-auto mb-0">{{ product.price | currency: 'EUR' }}</p>
+            <!-- Sold out products (RF15) -->
+            @if (product.stock === 0) {
+              <span class="badge text-bg-secondary align-self-start mt-2">Agotado</span>
+            }
+          </div>
+        </article>
+      </div>
+    }
+  </div>
+
+  <!-- Pages of 10 products (RF10) -->
+  @if (pages() > 1) {
+    <nav aria-label="Páginas del catálogo" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="page() === 1">
+          @if (page() > 1) {
+            <a class="page-link" routerLink="/tienda" [queryParams]="{ pagina: pageParam(page() - 1) }" queryParamsHandling="merge">
+              Anterior
+            </a>
+          } @else {
+            <span class="page-link">Anterior</span>
+          }
+        </li>
+        @for (number of pageNumbers(); track number) {
+          <li class="page-item" [class.active]="number === page()">
+            <a
+              class="page-link"
+              routerLink="/tienda"
+              [queryParams]="{ pagina: pageParam(number) }"
+              queryParamsHandling="merge"
+              [attr.aria-current]="number === page() ? 'page' : null"
+            >
+              {{ number }}
+            </a>
+          </li>
+        }
+        <li class="page-item" [class.disabled]="page() === pages()">
+          @if (page() < pages()) {
+            <a class="page-link" routerLink="/tienda" [queryParams]="{ pagina: page() + 1 }" queryParamsHandling="merge">
+              Siguiente
+            </a>
+          } @else {
+            <span class="page-link">Siguiente</span>
+          }
+        </li>
+      </ul>
+    </nav>
+  }
+}
