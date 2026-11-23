@@ -1,15 +1,23 @@
 <h1 class="h2 mb-4">Tienda</h1>
 
 <!-- Filters (RF11, RF12, RF13) -->
-<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="row g-3 align-items-end mb-4" role="search">
+<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="row g-3 mb-4" role="search">
   <div class="col-md-4">
     <label for="category" class="form-label">Categoría</label>
-    <select id="category" class="form-select" formControlName="category">
+    <select
+      id="category"
+      class="form-select"
+      formControlName="category"
+      [attr.aria-describedby]="categoriesFailed() ? 'category-error' : null"
+    >
       <option value="">Todas</option>
       @for (category of categories(); track category.id) {
         <option [value]="category.id">{{ category.name }}</option>
       }
     </select>
+    @if (categoriesFailed()) {
+      <div id="category-error" class="form-text text-danger">No se han podido cargar las categorías.</div>
+    }
   </div>
 
   <div class="col-md-4">

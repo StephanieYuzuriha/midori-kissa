@@ -48,13 +48,15 @@ export class Catalog {
   protected pages = signal(0);
   protected isLoading = signal(true);
   protected errorMessage = signal('');
+  // Separate from errorMessage: if only the categories fail, the products are still shown
+  protected categoriesFailed = signal(false);
 
   private request?: Subscription;
 
   constructor() {
     this.categoryService.getCategories().subscribe({
       next: (categories) => this.categories.set(categories),
-      error: (error: HttpErrorResponse) => this.errorMessage.set(getRequestError(error)),
+      error: () => this.categoriesFailed.set(true),
     });
 
     // The category and the order are applied as soon as they change; the search, when it is submitted
