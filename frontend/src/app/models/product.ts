@@ -37,3 +37,19 @@ export const GRADE_LABELS = {
   ceremonial: 'Ceremonial',
   culinary: 'Culinario',
 };
+
+// Text of the product URL, made from the name: "Chasen de bambú" → "chasen-de-bambu"
+export function productSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // removes the accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+// Address of the product page: /producto/1-matcha-ceremonial-uji-okumidori (RI16).
+// The number identifies the product; the text only describes it
+export function productUrl(product: Pick<Product, 'id' | 'name'>): string {
+  return `/producto/${product.id}-${productSlug(product.name)}`;
+}

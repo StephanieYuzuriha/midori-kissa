@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ProductPage } from '../models/product';
+import { Observable, map } from 'rxjs';
+import { Product, ProductPage } from '../models/product';
 
 // Catalog filters. Empty values are not sent to the API
 export interface CatalogFilters {
@@ -24,5 +24,10 @@ export class ProductService {
       }
     }
     return this.http.get<ProductPage>(this.apiUrl, { params });
+  }
+
+  // Product with all its photos. The API answers 404 if it does not exist or is withdrawn
+  getProduct(id: number): Observable<Product> {
+    return this.http.get<{ product: Product }>(`${this.apiUrl}/${id}`).pipe(map((response) => response.product));
   }
 }

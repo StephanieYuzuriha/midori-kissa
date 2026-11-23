@@ -1,0 +1,100 @@
+@if (isLoading()) {
+  <p role="status">Cargando producto…</p>
+} @else if (notFound()) {
+  <div class="text-center py-5">
+    <h1 class="h3">Producto no encontrado</h1>
+    <p class="text-body-secondary">Puede que el enlace no sea correcto o que el producto ya no esté a la venta.</p>
+    <a routerLink="/tienda" class="btn btn-primary">Ver la tienda</a>
+  </div>
+} @else if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">
+    {{ errorMessage() }}
+    <a routerLink="/tienda" class="alert-link">Volver a la tienda</a>
+  </div>
+} @else {
+  @if (product(); as product) {
+    <nav aria-label="Ruta de navegación">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/tienda">Tienda</a></li>
+        <li class="breadcrumb-item">
+          <a routerLink="/tienda" [queryParams]="{ categoria: product.categoryId }">{{ product.categoryName }}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4 g-lg-5">
+      <!-- Photo gallery (RI6) -->
+      <div class="col-md-6">
+        <div class="ratio ratio-1x1 bg-body-tertiary rounded border overflow-hidden">
+          @if (images().length > 0) {
+            <img [src]="images()[selectedImage()].path" [alt]="images()[selectedImage()].altText" class="w-100 h-100 object-fit-cover" />
+          } @else {
+            <div class="d-flex align-items-center justify-content-center text-body-secondary">Sin foto</div>
+          }
+        </div>
+
+        @if (images().length > 1) {
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            @for (image of images(); track image.path; let index = $index) {
+              <button
+                type="button"
+                class="btn p-0 border rounded overflow-hidden"
+                [class.border-dark]="index === selectedImage()"
+                [class.border-2]="index === selectedImage()"
+                [attr.aria-pressed]="index === selectedImage()"
+                (click)="selectImage(index)"
+              >
+                <img [src]="image.path" [alt]="image.altText" width="72" height="72" class="d-block object-fit-cover" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <h1 class="h2 mb-2">{{ product.name }}</h1>
+        @if (product.grade) {
+          <p class="text-body-secondary mb-2">{{ gradeLabels[product.grade] }}</p>
+        }
+        <p class="fs-3 fw-semibold mb-2">{{ product.price | currency: 'EUR' }}</p>
+
+        <!-- Available stock (RF14) or sold out (RF15) -->
+        @if (product.stock > 0) {
+          <p>En stock: {{ product.stock }} {{ product.stock === 1 ? 'unidad' : 'unidades' }}</p>
+        } @else {
+          <p><span class="badge text-bg-secondary fs-6">Agotado</span></p>
+        }
+
+        <p>{{ product.description }}</p>
+
+        @if (product.originRegion || product.cultivar || product.weightGrams) {
+          <section class="border rounded p-3 mb-3">
+            <h2 class="h5">Origen y formato</h2>
+            <dl class="row mb-0">
+              @if (product.originRegion) {
+                <dt class="col-sm-5">Región de origen</dt>
+                <dd class="col-sm-7">{{ product.originRegion }}</dd>
+              }
+              @if (product.cultivar) {
+                <dt class="col-sm-5">Cultivar</dt>
+                <dd class="col-sm-7">{{ product.cultivar }}</dd>
+              }
+              @if (product.weightGrams) {
+                <dt class="col-sm-5">Formato</dt>
+                <dd class="col-sm-7 mb-0">{{ product.weightGrams }} g</dd>
+              }
+            </dl>
+          </section>
+        }
+
+        @if (product.preparation) {
+          <section class="border rounded p-3">
+            <h2 class="h5">Preparación</h2>
+            <p class="mb-0">{{ product.preparation }}</p>
+          </section>
+        }
+      </div>
+    </div>
+  }
+}
