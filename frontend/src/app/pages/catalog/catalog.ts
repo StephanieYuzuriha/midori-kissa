@@ -5,7 +5,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Category } from '../../models/category';
-import { GRADE_LABELS, Product } from '../../models/product';
+import { GRADE_LABELS, Product, productUrl } from '../../models/product';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
 import { getRequestError } from '../../shared/form-messages';
@@ -35,6 +35,7 @@ export class Catalog {
 
   protected readonly sortOptions = SORT_OPTIONS;
   protected readonly gradeLabels = GRADE_LABELS;
+  protected readonly productUrl = productUrl;
 
   protected filtersForm = this.fb.group({
     category: [''],
