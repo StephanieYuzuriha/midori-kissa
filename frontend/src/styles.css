@@ -1,20 +1,226 @@
-/* Global styles. Colors from the Midori Kissa palette */
-:root {
-  --mk-green: #4a6328;
-  --mk-vermilion: #a8402a;
+/* Global styles: Midori Kissa palette and fonts on top of Bootstrap.
+   Only Bootstrap variables and a few rules are changed, so the components stay the same */
 
-  /* Form errors in vermilion (RI9) */
+/* Fonts served by our own server, not Google Fonts (RS20). Latin characters only.
+   Noto Sans for the text and Shippori Mincho for the titles (SIL Open Font License, see public/fonts) */
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/noto-sans-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/noto-sans-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/noto-sans-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Shippori Mincho';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/shippori-mincho-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Shippori Mincho';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/shippori-mincho-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Palette */
+  --mk-green: #4a6328;      /* matcha */
+  --mk-green-dark: #33441b;
+  --mk-leaf: #a9be6e;       /* hoja */
+  --mk-cream: #f7f3e8;      /* crema */
+  --mk-sumi: #2b2b28;       /* sumi (text) */
+  --mk-stone: #625f57;      /* piedra (secondary text) */
+  --mk-vermilion: #a8402a;  /* bermellón (errors) */
+  --mk-line: #e4dfd0;       /* soft lines */
+  --mk-field-border: #8a857a; /* form fields: 3:1 contrast with the background */
+
+  /* Fonts */
+  --bs-body-font-family: 'Noto Sans', system-ui, sans-serif;
+  --mk-title-font: 'Shippori Mincho', Georgia, serif;
+
+  /* Page colors */
+  --bs-body-bg: var(--mk-cream);
+  --bs-body-bg-rgb: 247, 243, 232;
+  --bs-body-color: var(--mk-sumi);
+  --bs-body-color-rgb: 43, 43, 40;
+  --bs-emphasis-color: var(--mk-sumi);
+  --bs-emphasis-color-rgb: 43, 43, 40;
+  --bs-heading-color: var(--mk-sumi);
+  --bs-secondary-color: var(--mk-stone);
+  --bs-secondary-rgb: 98, 95, 87;
+  --bs-tertiary-bg: #efe9da;
+  --bs-tertiary-bg-rgb: 239, 233, 218;
+  --bs-border-color: var(--mk-line);
+
+  /* Links and focus in matcha green */
+  --bs-link-color: var(--mk-green);
+  --bs-link-color-rgb: 74, 99, 40;
+  --bs-link-hover-color: var(--mk-green-dark);
+  --bs-link-hover-color-rgb: 51, 68, 27;
+  --bs-focus-ring-color: rgba(74, 99, 40, 0.25);
+
+  /* Errors in vermilion (RI9) and confirmations in green */
+  --bs-danger-rgb: 168, 64, 42;
+  --bs-danger-text-emphasis: #6b2819;
+  --bs-danger-bg-subtle: #f6e3de;
+  --bs-danger-border-subtle: #e8c3b9;
+  --bs-success-text-emphasis: var(--mk-green-dark);
+  --bs-success-bg-subtle: #e6edd5;
+  --bs-success-border-subtle: #c9d6a8;
   --bs-form-invalid-color: var(--mk-vermilion);
   --bs-form-invalid-border-color: var(--mk-vermilion);
 }
 
+/* Titles in Shippori Mincho */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--mk-title-font);
+  font-weight: 500;
+}
+
+/* Header in ink (sumi): shop name in leaf green (Mincho) and menu links in cream */
+.site-header {
+  background-color: var(--mk-sumi);
+}
+
+.site-header .navbar {
+  --bs-navbar-color: var(--mk-cream);
+  --bs-navbar-hover-color: #fff;
+  --bs-navbar-active-color: #fff;
+  --bs-navbar-brand-color: var(--mk-leaf);
+  --bs-navbar-brand-hover-color: #c3d395;
+}
+
+.navbar-brand {
+  font-family: var(--mk-title-font);
+  font-weight: 700;
+}
+
+/* The page you are on is underlined, not only shown in another color */
+.site-header .nav-link.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* The green focus ring is not visible on the dark header */
+.site-header a:focus-visible,
+.site-header button:focus-visible {
+  outline: 2px solid var(--mk-leaf);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.site-header .btn-outline-secondary {
+  --bs-btn-color: var(--mk-cream);
+  --bs-btn-border-color: var(--mk-cream);
+  --bs-btn-hover-color: var(--mk-sumi);
+  --bs-btn-hover-bg: var(--mk-cream);
+  --bs-btn-hover-border-color: var(--mk-cream);
+  --bs-btn-active-color: var(--mk-sumi);
+  --bs-btn-active-bg: #fff;
+  --bs-btn-active-border-color: #fff;
+}
+
+/* Buttons */
 .btn-primary {
   --bs-btn-bg: var(--mk-green);
   --bs-btn-border-color: var(--mk-green);
   --bs-btn-hover-bg: #3c5020;
   --bs-btn-hover-border-color: #3c5020;
-  --bs-btn-active-bg: #33441b;
-  --bs-btn-active-border-color: #33441b;
+  --bs-btn-active-bg: var(--mk-green-dark);
+  --bs-btn-active-border-color: var(--mk-green-dark);
   --bs-btn-disabled-bg: var(--mk-green);
   --bs-btn-disabled-border-color: var(--mk-green);
+  --bs-btn-focus-shadow-rgb: 74, 99, 40;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--mk-stone);
+  --bs-btn-border-color: var(--mk-stone);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--mk-stone);
+  --bs-btn-hover-border-color: var(--mk-stone);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #4f4c45;
+  --bs-btn-active-border-color: #4f4c45;
+  --bs-btn-focus-shadow-rgb: 98, 95, 87;
+}
+
+/* Form fields in white on the cream background */
+.form-control,
+.form-select {
+  background-color: #fff;
+  border-color: var(--mk-field-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--mk-green);
+  box-shadow: 0 0 0 0.25rem rgba(74, 99, 40, 0.25);
+}
+
+/* Catalog cards: white, without border and with a soft shadow */
+.card {
+  --bs-card-bg: #fff;
+  --bs-card-border-width: 0;
+  box-shadow: 0 1px 4px rgba(43, 43, 40, 0.12);
+  transition: box-shadow 0.2s;
+}
+
+/* The whole card is a link to the product page */
+.card:has(.stretched-link):hover {
+  box-shadow: 0 6px 16px rgba(43, 43, 40, 0.14);
+}
+
+/* Breadcrumb links without underline until the mouse is over them */
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Pagination in matcha green */
+.pagination {
+  --bs-pagination-color: var(--mk-green);
+  --bs-pagination-bg: #fff;
+  --bs-pagination-border-color: var(--mk-line);
+  --bs-pagination-hover-color: var(--mk-green-dark);
+  --bs-pagination-hover-bg: #eef2e4;
+  --bs-pagination-hover-border-color: var(--mk-line);
+  --bs-pagination-focus-color: var(--mk-green-dark);
+  --bs-pagination-focus-bg: #eef2e4;
+  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(74, 99, 40, 0.25);
+  --bs-pagination-active-bg: var(--mk-green);
+  --bs-pagination-active-border-color: var(--mk-green);
+  --bs-pagination-disabled-color: var(--mk-stone);
+  --bs-pagination-disabled-bg: #fff;
+  --bs-pagination-disabled-border-color: var(--mk-line);
 }
