@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, WritableSignal, inject, signal } from '@angular/core';
 import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { User } from '../../models/user';
 import { AuthService } from '../../services/auth.service';
 import {
@@ -19,7 +19,7 @@ const SUCCESS_MESSAGE_MS = 4000;
 // Same length limits as the backend
 @Component({
   selector: 'app-account',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './account.html',
 })
 export class Account implements OnInit {

@@ -5,6 +5,8 @@ import { Cart } from './pages/cart/cart';
 import { Catalog } from './pages/catalog/catalog';
 import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
+import { MyOrders } from './pages/my-orders/my-orders';
+import { OrderDetail } from './pages/order-detail/order-detail';
 import { PrivacyPolicy } from './pages/privacy-policy/privacy-policy';
 import { ProductDetail } from './pages/product-detail/product-detail';
 import { Register } from './pages/register/register';
@@ -19,6 +21,13 @@ export const routes: Routes = [
   { path: 'crear-cuenta', component: Register, title: 'Crear cuenta | Midori Kissa' },
   { path: 'carrito', component: Cart, title: 'Carrito | Midori Kissa' },
   { path: 'mi-cuenta', component: Account, canActivate: [authGuard], title: 'Mi cuenta | Midori Kissa' },
+  { path: 'mi-cuenta/pedidos', component: MyOrders, canActivate: [authGuard], title: 'Mis pedidos | Midori Kissa' },
+  {
+    path: 'mi-cuenta/pedidos/:orderNumber',
+    component: OrderDetail,
+    canActivate: [authGuard],
+    title: 'Detalle del pedido | Midori Kissa',
+  },
   { path: 'politica-de-privacidad', component: PrivacyPolicy, title: 'Política de privacidad | Midori Kissa' },
   { path: '**', redirectTo: '' },
 ];

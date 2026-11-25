@@ -1,0 +1,44 @@
+<nav aria-label="Ruta de navegación">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink="/mi-cuenta">Mi cuenta</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Mis pedidos</li>
+  </ol>
+</nav>
+
+<h1 class="h2 mb-4">Mis pedidos</h1>
+
+@if (isLoading()) {
+  <p role="status">Cargando tus pedidos…</p>
+} @else if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+} @else if (orders().length === 0) {
+  <div class="text-center py-5">
+    <p class="lead">Todavía no has hecho ningún pedido.</p>
+    <a routerLink="/tienda" class="btn btn-primary">Ir a la tienda</a>
+  </div>
+} @else {
+  <div class="table-responsive">
+    <table class="table align-middle bg-white">
+      <caption class="visually-hidden">Tus pedidos, del más reciente al más antiguo</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Número de pedido</th>
+          <th scope="col" class="text-end">Importe</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.orderNumber) {
+          <tr>
+            <td>{{ order.createdAt | date: 'd/M/y' }}</td>
+            <td><a [routerLink]="['/mi-cuenta/pedidos', order.orderNumber]">{{ order.orderNumber }}</a></td>
+            <td class="text-end">{{ order.total | currency: 'EUR' }}</td>
+            <!-- Colour and text, not only colour (RI12) -->
+            <td><span class="badge" [class]="status[order.status].badge">{{ status[order.status].label }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
