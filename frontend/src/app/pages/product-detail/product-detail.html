@@ -59,9 +59,31 @@
         }
         <p class="fs-3 fw-semibold mb-2">{{ product.price | currency: 'EUR' }}</p>
 
-        <!-- Available stock (RF14) or sold out (RF15) -->
+        <!-- Available stock (RF14) or sold out, without the cart button (RF15) -->
         @if (product.stock > 0) {
           <p>En stock: {{ product.stock }} {{ product.stock === 1 ? 'unidad' : 'unidades' }}</p>
+
+          <!-- Add to the cart without going over the stock (RF16) -->
+          @if (available() > 0) {
+            <form class="d-flex align-items-end gap-2 mb-3" novalidate (submit)="$event.preventDefault(); addToCart(product)">
+              <div>
+                <label for="quantity" class="form-label">Cantidad</label>
+                <input
+                  id="quantity"
+                  type="number"
+                  class="form-control"
+                  style="width: 6rem"
+                  min="1"
+                  [max]="available()"
+                  [value]="quantity()"
+                  (change)="setQuantity($any($event.target).value)"
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Añadir al carrito</button>
+            </form>
+          } @else {
+            <p class="text-body-secondary">Ya tienes en el carrito todas las unidades disponibles.</p>
+          }
         } @else {
           <p><span class="badge text-bg-secondary fs-6">Agotado</span></p>
         }

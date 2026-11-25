@@ -5,10 +5,11 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GRADE_LABELS, Product, productSlug, productUrl } from '../../models/product';
+import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
 import { getRequestError } from '../../shared/form-messages';
 
-// Product page: /producto/1-matcha-ceremonial-uji-okumidori (RF14, RF15, RI6).
+// Product page: /producto/1-matcha-ceremonial-uji-okumidori (RF14–RF16, RI6).
 // The number at the start of the URL identifies the product; the text is only descriptive
 @Component({
   selector: 'app-product-detail',
@@ -20,6 +21,7 @@ export class ProductDetail {
   private router = inject(Router);
   private title = inject(Title);
   private productService = inject(ProductService);
+  private cart = inject(CartService);
 
   protected readonly gradeLabels = GRADE_LABELS;
 
@@ -31,6 +33,13 @@ export class ProductDetail {
   protected notFound = signal(false);
   protected errorMessage = signal('');
 
+  // Units to add to the cart and units that can still be added (stock minus what is already in the cart)
+  protected quantity = signal(1);
+  protected available = computed(() => {
+    const product = this.product();
+    return product ? Math.max(0, product.stock - this.cart.quantityOf(product.id)) : 0;
+  });
+
   private slug = '';
   private request?: Subscription;
 
@@ -40,6 +49,17 @@ export class ProductDetail {
 
   protected selectImage(index: number): void {
     this.selectedImage.set(index);
+  }
+
+  protected setQuantity(value: string): void {
+    this.quantity.set(Math.trunc(Number(value)) || 1);
+  }
+
+  // Adds the units without going over the stock (RF16) and opens the cart panel (RI7)
+  protected addToCart(product: Product): void {
+    const quantity = Math.min(Math.max(this.quantity(), 1), this.available());
+    this.cart.add(product, quantity);
+    this.quantity.set(1);
   }
 
   private loadProduct(slug: string): void {
@@ -56,6 +76,7 @@ export class ProductDetail {
     this.request?.unsubscribe();
     this.product.set(null);
     this.selectedImage.set(0);
+    this.quantity.set(1);
     this.notFound.set(false);
     this.errorMessage.set('');
 

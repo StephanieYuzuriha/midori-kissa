@@ -1,0 +1,114 @@
+<h1 class="h2 mb-4">Carrito</h1>
+
+@if (isLoading()) {
+  <p role="status">Comprobando el carrito…</p>
+} @else {
+  @if (errorMessage()) {
+    <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+  }
+
+  @if (notices().length > 0) {
+    <div class="alert alert-warning" role="status">
+      <ul class="mb-0 ps-3">
+        @for (notice of notices(); track notice) {
+          <li>{{ notice }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (cart.lines().length === 0) {
+    <div class="text-center py-5">
+      <p class="lead">Tu carrito está vacío.</p>
+      <a routerLink="/tienda" class="btn btn-primary">Ir a la tienda</a>
+    </div>
+  } @else {
+    <div class="row g-4">
+      <!-- Products in the cart (RF17) -->
+      <div class="col-lg-8">
+        <ul class="list-unstyled mb-0">
+          @for (line of cart.lines(); track line.productId) {
+            <li class="card mb-3">
+              <div class="card-body d-flex flex-wrap align-items-center gap-3">
+                @if (line.image) {
+                  <img [src]="line.image" alt="" width="80" height="80" class="rounded object-fit-cover" />
+                }
+                <div class="flex-grow-1">
+                  <a [routerLink]="productUrl({ id: line.productId, name: line.name })" class="link-body-emphasis fw-semibold">
+                    {{ line.name }}
+                  </a>
+                  <div class="small text-body-secondary">{{ line.price | currency: 'EUR' }} / unidad</div>
+                </div>
+
+                <div>
+                  <label [for]="'quantity-' + line.productId" class="visually-hidden">Cantidad de {{ line.name }}</label>
+                  <input
+                    #quantityInput
+                    [id]="'quantity-' + line.productId"
+                    type="number"
+                    class="form-control"
+                    style="width: 5.5rem"
+                    min="1"
+                    [max]="line.stock"
+                    [value]="line.quantity"
+                    (change)="changeQuantity(line, quantityInput.value, quantityInput)"
+                  />
+                </div>
+
+                <div class="text-end fw-semibold" style="min-width: 6rem">{{ line.price * line.quantity | currency: 'EUR' }}</div>
+
+                <button
+                  type="button"
+                  class="btn btn-link link-danger text-decoration-none p-0 d-inline-flex align-items-center gap-1"
+                  [attr.aria-label]="'Quitar ' + line.name + ' del carrito'"
+                  (click)="remove(line)"
+                >
+                  <!-- Icono trash3 de Bootstrap Icons (licencia MIT) -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                  </svg>
+                  Quitar
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Subtotal, shipping costs and total (RF19) -->
+      <div class="col-lg-4">
+        <section class="card" aria-labelledby="summary-title">
+          <div class="card-body">
+            <h2 id="summary-title" class="h5 mb-3">Resumen</h2>
+            <dl class="row mb-2">
+              <dt class="col-6 fw-normal">Subtotal</dt>
+              <dd class="col-6 text-end mb-1">{{ cart.subtotal() | currency: 'EUR' }}</dd>
+              <dt class="col-6 fw-normal">Envío</dt>
+              <dd class="col-6 text-end mb-1">
+                {{ cart.shippingCost() === 0 ? 'Gratis' : (cart.shippingCost() | currency: 'EUR') }}
+              </dd>
+              <dt class="col-6 border-top pt-2">Total</dt>
+              <dd class="col-6 text-end fw-semibold border-top pt-2 mb-0">{{ cart.total() | currency: 'EUR' }}</dd>
+            </dl>
+            @if (cart.missingForFreeShipping() > 0) {
+              <p class="small text-body-secondary">
+                Te faltan {{ cart.missingForFreeShipping() | currency: 'EUR' }} para el envío gratis.
+              </p>
+            } @else {
+              <p class="small text-success-emphasis">Tienes el envío gratis.</p>
+            }
+            @if (cart.rates(); as rates) {
+              <p class="small text-body-secondary">
+                Envío a la península: {{ rates.flatRate | currency: 'EUR' }}, gratis a partir de {{ rates.freeFrom | currency: 'EUR' }}.
+              </p>
+            }
+            <div class="d-grid gap-2">
+              <a routerLink="/pago" class="btn btn-primary">Tramitar pedido</a>
+              <a routerLink="/tienda" class="btn btn-outline-secondary">Seguir comprando</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+}

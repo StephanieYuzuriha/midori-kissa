@@ -75,8 +75,17 @@
               <p class="small text-body-secondary mb-2">{{ gradeLabels[product.grade] }}</p>
             }
             <p class="fw-semibold mt-auto mb-0">{{ product.price | currency: 'EUR' }}</p>
-            <!-- Sold out products (RF15) -->
-            @if (product.stock === 0) {
+            <!-- Cart button (RI5), above the card link (z-2). Sold out products cannot be added (RF15) -->
+            @if (product.stock > 0) {
+              <button
+                type="button"
+                class="btn btn-primary btn-sm align-self-start mt-2 position-relative z-2"
+                [attr.aria-label]="'Añadir ' + product.name + ' al carrito'"
+                (click)="addToCart(product)"
+              >
+                Añadir al carrito
+              </button>
+            } @else {
               <span class="badge text-bg-secondary align-self-start mt-2">Agotado</span>
             }
           </div>

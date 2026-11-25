@@ -1,0 +1,106 @@
+@if (cart.isPanelOpen()) {
+  <div class="offcanvas-backdrop fade show" (click)="close()"></div>
+}
+
+<div
+  #panel
+  class="offcanvas offcanvas-end"
+  [class.show]="cart.isPanelOpen()"
+  tabindex="-1"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cart-panel-title"
+  [attr.inert]="cart.isPanelOpen() ? null : ''"
+>
+  <div class="offcanvas-header border-bottom">
+    <h2 id="cart-panel-title" class="offcanvas-title h5">Tu carrito</h2>
+    <button type="button" class="btn-close" aria-label="Cerrar el carrito" (click)="close()"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column">
+    @if (cart.lastAdded(); as added) {
+      <p role="status" [class]="added.quantity > 0 ? 'text-success-emphasis' : 'text-body-secondary'">
+        @if (added.quantity > 0) {
+          Has añadido {{ added.quantity }} {{ added.quantity === 1 ? 'unidad' : 'unidades' }} de «{{ added.name }}».
+        } @else {
+          Ya tienes en el carrito todas las unidades disponibles de «{{ added.name }}».
+        }
+      </p>
+    }
+
+    @if (cart.lines().length === 0) {
+      <p>Tu carrito está vacío.</p>
+    }
+
+    <!-- Units and removal of each product without leaving the page (RF17) -->
+    <ul class="list-unstyled mb-3">
+      @for (line of cart.lines(); track line.productId) {
+        <li class="d-flex gap-3 py-2 border-bottom">
+          @if (line.image) {
+            <img [src]="line.image" alt="" width="56" height="56" class="rounded object-fit-cover flex-shrink-0" />
+          }
+          <div class="flex-grow-1">
+            <a [routerLink]="productUrl({ id: line.productId, name: line.name })" class="link-body-emphasis">{{ line.name }}</a>
+            <div class="small text-body-secondary">{{ line.price | currency: 'EUR' }} / unidad</div>
+            <div class="d-flex align-items-center gap-2 mt-1">
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm px-2 py-0"
+                [attr.aria-label]="'Quitar una unidad de ' + line.name"
+                [disabled]="line.quantity <= 1"
+                (click)="changeQuantity(line, -1)"
+              >
+                −
+              </button>
+              <span class="fw-semibold text-center" style="min-width: 1.5rem" aria-live="polite">
+                {{ line.quantity }}<span class="visually-hidden"> {{ line.quantity === 1 ? 'unidad' : 'unidades' }}</span>
+              </span>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm px-2 py-0"
+                [attr.aria-label]="'Añadir una unidad de ' + line.name"
+                [disabled]="line.quantity >= line.stock"
+                (click)="changeQuantity(line, 1)"
+              >
+                +
+              </button>
+              <span class="ms-auto fw-semibold">{{ line.price * line.quantity | currency: 'EUR' }}</span>
+              <button
+                type="button"
+                class="btn btn-link link-danger p-0 d-inline-flex"
+                [attr.aria-label]="'Quitar ' + line.name + ' del carrito'"
+                (click)="remove(line)"
+              >
+                <!-- Icono trash3 de Bootstrap Icons (licencia MIT) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                  <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+
+    @if (cart.lines().length > 0) {
+      <dl class="row mb-1">
+        <dt class="col-6 fw-normal">Subtotal</dt>
+        <dd class="col-6 text-end mb-1">{{ cart.subtotal() | currency: 'EUR' }}</dd>
+        <dt class="col-6 fw-normal">Envío</dt>
+        <dd class="col-6 text-end mb-1">{{ cart.shippingCost() === 0 ? 'Gratis' : (cart.shippingCost() | currency: 'EUR') }}</dd>
+        <dt class="col-6">Total</dt>
+        <dd class="col-6 text-end fw-semibold mb-0">{{ cart.total() | currency: 'EUR' }}</dd>
+      </dl>
+      @if (cart.missingForFreeShipping() > 0) {
+        <p class="small text-body-secondary">Te faltan {{ cart.missingForFreeShipping() | currency: 'EUR' }} para el envío gratis.</p>
+      }
+    }
+
+    <div class="d-grid gap-2 mt-auto">
+      @if (cart.lines().length > 0) {
+        <a routerLink="/carrito" class="btn btn-primary">Ver el carrito y tramitar el pedido</a>
+      }
+      <button type="button" class="btn btn-outline-secondary" (click)="close()">Seguir comprando</button>
+    </div>
+  </div>
+</div>

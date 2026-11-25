@@ -6,6 +6,7 @@ import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Category } from '../../models/category';
 import { GRADE_LABELS, Product, productUrl } from '../../models/product';
+import { CartService } from '../../services/cart.service';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
 import { getRequestError } from '../../shared/form-messages';
@@ -32,6 +33,7 @@ export class Catalog {
   private fb = inject(NonNullableFormBuilder);
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
+  private cart = inject(CartService);
 
   protected readonly sortOptions = SORT_OPTIONS;
   protected readonly gradeLabels = GRADE_LABELS;
@@ -66,6 +68,11 @@ export class Catalog {
 
     // Every change in the URL (a filter or the page) loads the products again
     this.route.queryParamMap.subscribe((params) => this.loadProducts(params));
+  }
+
+  // One unit from the card; the cart panel opens to confirm it (RI5, RI7)
+  protected addToCart(product: Product): void {
+    this.cart.add(product, 1);
   }
 
   applyFilters(): void {

@@ -1,5 +1,6 @@
 <header class="site-header">
-  <nav class="navbar navbar-expand" aria-label="Principal">
+  <!-- flex-wrap: on narrow screens the links go to a second line (the hamburger menu comes in T18, RI4) -->
+  <nav class="navbar navbar-expand flex-wrap" aria-label="Principal">
     <div class="container">
       <a class="navbar-brand" routerLink="/">Midori Kissa</a>
 
@@ -9,7 +10,18 @@
         </li>
       </ul>
 
-      <ul class="navbar-nav align-items-center gap-2">
+      <ul class="navbar-nav flex-wrap align-items-center gap-2">
+        <!-- Units in the cart, updated without reloading (RF17) -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/carrito" routerLinkActive="active" ariaCurrentWhenActive="page">
+            Carrito
+            @if (cart.count() > 0) {
+              <span class="badge rounded-pill text-bg-light ms-1">
+                {{ cart.count() }}<span class="visually-hidden"> {{ cart.count() === 1 ? 'unidad' : 'unidades' }}</span>
+              </span>
+            }
+          </a>
+        </li>
         @if (auth.user(); as user) {
           <li class="nav-item">
             <span class="navbar-text">Hola, {{ user.firstName }}</span>
