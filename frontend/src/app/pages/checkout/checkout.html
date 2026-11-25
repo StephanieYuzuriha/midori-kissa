@@ -1,0 +1,242 @@
+<h1 class="h2 mb-3">Tramitar pedido</h1>
+
+<!-- Steps of the checkout with the current one marked (RI8) -->
+<ol class="checkout-steps list-unstyled d-flex flex-wrap gap-4 mb-4" aria-label="Pasos del pedido">
+  <li aria-current="step" class="fw-semibold"><span class="badge rounded-pill me-1">1</span> Datos de envío</li>
+  <li class="text-body-secondary"><span class="badge rounded-pill me-1">2</span> Pago</li>
+  <li class="text-body-secondary"><span class="badge rounded-pill me-1">3</span> Confirmación</li>
+</ol>
+
+@if (isLoading()) {
+  <p role="status">Comprobando el carrito…</p>
+} @else if (cart.lines().length === 0) {
+  <div class="text-center py-5">
+    <p class="lead">Tu carrito está vacío.</p>
+    <a routerLink="/tienda" class="btn btn-primary">Ir a la tienda</a>
+  </div>
+} @else {
+  @if (notices().length > 0) {
+    <div class="alert alert-warning" role="status">
+      <ul class="mb-0 ps-3">
+        @for (notice of notices(); track notice) {
+          <li>{{ notice }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">
+          {{ errorMessage() }}
+          <a routerLink="/carrito" class="alert-link">Volver al carrito</a>
+        </div>
+      }
+      @if (emailExists()) {
+        <div class="alert alert-danger" role="alert">
+          Ya existe una cuenta con este email.
+          <a routerLink="/iniciar-sesion" [queryParams]="{ returnUrl: '/pago' }" class="alert-link">Inicia sesión para continuar</a>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <!-- Shipping data, filled in with the saved address if the customer is logged in (RF20) -->
+        <h2 class="h5 mb-3">Datos de envío</h2>
+        <div class="row">
+          <div class="col-sm-6 mb-3">
+            <label for="firstName" class="form-label">Nombre</label>
+            <input
+              id="firstName"
+              type="text"
+              class="form-control"
+              formControlName="firstName"
+              autocomplete="given-name"
+              [class.is-invalid]="isInvalid('firstName')"
+              [attr.aria-invalid]="isInvalid('firstName')"
+              [attr.aria-describedby]="isInvalid('firstName') ? 'firstName-error' : null"
+            />
+            @if (isInvalid('firstName')) {
+              <div id="firstName-error" class="invalid-feedback">{{ errorFor('firstName') }}</div>
+            }
+          </div>
+          <div class="col-sm-6 mb-3">
+            <label for="lastName" class="form-label">Apellidos</label>
+            <input
+              id="lastName"
+              type="text"
+              class="form-control"
+              formControlName="lastName"
+              autocomplete="family-name"
+              [class.is-invalid]="isInvalid('lastName')"
+              [attr.aria-invalid]="isInvalid('lastName')"
+              [attr.aria-describedby]="isInvalid('lastName') ? 'lastName-error' : null"
+            />
+            @if (isInvalid('lastName')) {
+              <div id="lastName-error" class="invalid-feedback">{{ errorFor('lastName') }}</div>
+            }
+          </div>
+          <div class="col-sm-6 mb-3">
+            <label for="phone" class="form-label">Teléfono</label>
+            <input
+              id="phone"
+              type="tel"
+              class="form-control"
+              formControlName="phone"
+              autocomplete="tel"
+              [class.is-invalid]="isInvalid('phone')"
+              [attr.aria-invalid]="isInvalid('phone')"
+              [attr.aria-describedby]="isInvalid('phone') ? 'phone-error' : null"
+            />
+            @if (isInvalid('phone')) {
+              <div id="phone-error" class="invalid-feedback">{{ errorFor('phone') }}</div>
+            }
+          </div>
+          <div class="col-12 mb-3">
+            <label for="address" class="form-label">Dirección</label>
+            <input
+              id="address"
+              type="text"
+              class="form-control"
+              formControlName="address"
+              autocomplete="street-address"
+              [class.is-invalid]="isInvalid('address')"
+              [attr.aria-invalid]="isInvalid('address')"
+              [attr.aria-describedby]="isInvalid('address') ? 'address-error' : null"
+            />
+            @if (isInvalid('address')) {
+              <div id="address-error" class="invalid-feedback">{{ errorFor('address') }}</div>
+            }
+          </div>
+          <div class="col-sm-4 mb-3">
+            <label for="postalCode" class="form-label">Código postal</label>
+            <input
+              id="postalCode"
+              type="text"
+              class="form-control"
+              formControlName="postalCode"
+              autocomplete="postal-code"
+              [class.is-invalid]="isInvalid('postalCode')"
+              [attr.aria-invalid]="isInvalid('postalCode')"
+              [attr.aria-describedby]="isInvalid('postalCode') ? 'postalCode-error' : null"
+            />
+            @if (isInvalid('postalCode')) {
+              <div id="postalCode-error" class="invalid-feedback">{{ errorFor('postalCode') }}</div>
+            }
+          </div>
+          <div class="col-sm-4 mb-3">
+            <label for="city" class="form-label">Ciudad</label>
+            <input
+              id="city"
+              type="text"
+              class="form-control"
+              formControlName="city"
+              autocomplete="address-level2"
+              [class.is-invalid]="isInvalid('city')"
+              [attr.aria-invalid]="isInvalid('city')"
+              [attr.aria-describedby]="isInvalid('city') ? 'city-error' : null"
+            />
+            @if (isInvalid('city')) {
+              <div id="city-error" class="invalid-feedback">{{ errorFor('city') }}</div>
+            }
+          </div>
+          <div class="col-sm-4 mb-3">
+            <label for="province" class="form-label">Provincia</label>
+            <input
+              id="province"
+              type="text"
+              class="form-control"
+              formControlName="province"
+              autocomplete="address-level1"
+              [class.is-invalid]="isInvalid('province')"
+              [attr.aria-invalid]="isInvalid('province')"
+              [attr.aria-describedby]="isInvalid('province') ? 'province-error' : null"
+            />
+            @if (isInvalid('province')) {
+              <div id="province-error" class="invalid-feedback">{{ errorFor('province') }}</div>
+            }
+          </div>
+        </div>
+
+        <!-- Account created during the checkout, adding only a password (RF2) -->
+        @if (!auth.user()) {
+          <h2 class="h5 mt-2 mb-1">Crea tu cuenta</h2>
+          <p class="text-body-secondary small">
+            Con tu cuenta podrás consultar tus pedidos. ¿Ya tienes una?
+            <a routerLink="/iniciar-sesion" [queryParams]="{ returnUrl: '/pago' }">Inicia sesión</a>
+          </p>
+          <div class="row">
+          <div class="col-sm-6 mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-control"
+              formControlName="email"
+              autocomplete="email"
+              [class.is-invalid]="isInvalid('email')"
+              [attr.aria-invalid]="isInvalid('email')"
+              [attr.aria-describedby]="isInvalid('email') ? 'email-error' : null"
+            />
+            @if (isInvalid('email')) {
+              <div id="email-error" class="invalid-feedback">{{ errorFor('email') }}</div>
+            }
+          </div>
+          <div class="col-sm-6 mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              class="form-control"
+              formControlName="password"
+              autocomplete="new-password"
+              [class.is-invalid]="isInvalid('password')"
+              [attr.aria-invalid]="isInvalid('password')"
+              [attr.aria-describedby]="isInvalid('password') ? 'password-error password-help' : 'password-help'"
+            />
+            <div id="password-help" class="form-text">Al menos 8 caracteres, con una letra y un número.</div>
+            @if (isInvalid('password')) {
+              <div id="password-error" class="invalid-feedback">{{ errorFor('password') }}</div>
+            }
+          </div>
+          </div>
+          <!-- Information about personal data (RS19) -->
+          <p class="form-text">
+            Al crear la cuenta, Midori Kissa tratará tus datos para gestionar tu cuenta y tus pedidos.
+            Puedes consultar cómo los tratamos y cómo ejercer tus derechos en la
+            <a routerLink="/politica-de-privacidad">política de privacidad</a>.
+          </p>
+        }
+
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          {{ isSaving() ? 'Guardando el pedido…' : 'Continuar al pago' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Order summary with the shipping costs (RF19) -->
+    <div class="col-lg-5">
+      <section class="card" aria-labelledby="summary-title">
+        <div class="card-body">
+          <h2 id="summary-title" class="h5 mb-3">Tu pedido</h2>
+          <ul class="list-unstyled mb-3">
+            @for (line of cart.lines(); track line.productId) {
+              <li class="d-flex justify-content-between gap-3 py-1">
+                <span>{{ line.quantity }} × {{ line.name }}</span>
+                <span class="text-nowrap">{{ line.price * line.quantity | currency: 'EUR' }}</span>
+              </li>
+            }
+          </ul>
+          <dl class="row mb-0 border-top pt-2">
+            <dt class="col-6 fw-normal">Subtotal</dt>
+            <dd class="col-6 text-end mb-1">{{ cart.subtotal() | currency: 'EUR' }}</dd>
+            <dt class="col-6 fw-normal">Envío</dt>
+            <dd class="col-6 text-end mb-1">{{ cart.shippingCost() === 0 ? 'Gratis' : (cart.shippingCost() | currency: 'EUR') }}</dd>
+            <dt class="col-6">Total</dt>
+            <dd class="col-6 text-end fw-semibold mb-0">{{ cart.total() | currency: 'EUR' }}</dd>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+}

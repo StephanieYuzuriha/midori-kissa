@@ -17,11 +17,17 @@ export interface LoginData {
   password: string;
 }
 
+// The address is optional: it is sent when the account is created during the checkout (RF2)
 export interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  phone?: string;
+  address?: string;
+  postalCode?: string;
+  city?: string;
+  province?: string;
 }
 
 // Data that the customer can change in "Mi cuenta" (the email and the role cannot be changed)

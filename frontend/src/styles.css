@@ -224,3 +224,14 @@ h1, h2, h3, h4, h5, h6,
   --bs-pagination-disabled-bg: #fff;
   --bs-pagination-disabled-border-color: var(--mk-line);
 }
+
+/* Steps of the checkout (RI8): the current step in matcha green */
+.checkout-steps .badge {
+  background-color: var(--mk-line);
+  color: var(--mk-sumi);
+}
+
+.checkout-steps [aria-current='step'] .badge {
+  background-color: var(--mk-green);
+  color: #fff;
+}
