@@ -8,6 +8,13 @@ class Router
 {
     private const API_PREFIX = '/api';
 
+    // What each {parameter} of a route accepts: {id} only a positive whole number and
+    // {orderNumber} only an order number such as MK-2027-7F3K9Q
+    private const PARAMETERS = [
+        'id' => '([0-9]+)',
+        'orderNumber' => '(MK-[0-9]{4}-[A-Z0-9]{6})',
+    ];
+
     // Routes grouped by HTTP method: ['GET' => ['/products/{id}' => [Controller::class, 'method']]]
     private array $routes = [];
 
@@ -38,15 +45,22 @@ class Router
     }
 
     // Compares a route such as /products/{id} with the requested path.
-    // A {parameter} only accepts a positive whole number (an id). Returns the parameter
-    // values as integers, or null if the path does not match the route
+    // Returns the parameter values (ids as integers), or null if the path does not match the route
     private function match(string $route, string $path): ?array
     {
-        $pattern = '#^' . preg_replace('#\{[a-z]+\}#', '([0-9]+)', $route) . '$#';
-        if (!preg_match($pattern, $path, $matches)) {
+        preg_match_all('#\{([a-zA-Z]+)\}#', $route, $names);
+        $pattern = preg_replace_callback('#\{([a-zA-Z]+)\}#', fn(array $m) => self::PARAMETERS[$m[1]], $route);
+        if (!preg_match('#^' . $pattern . '$#', $path, $matches)) {
             return null;
         }
 
-        return array_map('intval', array_slice($matches, 1));
+        $values = array_slice($matches, 1);
+        foreach ($names[1] as $i => $name) {
+            if ($name === 'id') {
+                $values[$i] = (int) $values[$i];
+            }
+        }
+
+        return $values;
     }
 }

@@ -8,6 +8,7 @@ declare(strict_types=1);
 use App\Controllers\AuthController;
 use App\Controllers\CategoryController;
 use App\Controllers\HealthController;
+use App\Controllers\OrderController;
 use App\Controllers\ProductController;
 use App\Controllers\UserController;
 
@@ -30,3 +31,9 @@ $router->add('PUT', '/users/me/password', UserController::class, 'changePassword
 $router->add('GET', '/categories', CategoryController::class, 'index');
 $router->add('GET', '/products', ProductController::class, 'index');
 $router->add('GET', '/products/{id}', ProductController::class, 'show');
+
+// Cart and orders of the logged-in customer
+$router->add('GET', '/shipping', OrderController::class, 'shipping');
+$router->add('POST', '/orders', OrderController::class, 'store');
+$router->add('GET', '/orders/mine', OrderController::class, 'myOrders');
+$router->add('GET', '/orders/{orderNumber}', OrderController::class, 'show');
