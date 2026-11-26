@@ -32,6 +32,15 @@ $router->add('GET', '/categories', CategoryController::class, 'index');
 $router->add('GET', '/products', ProductController::class, 'index');
 $router->add('GET', '/products/{id}', ProductController::class, 'show');
 
+// Admin panel: products (RF28–RF30, RF32). Every method checks the admin role (RS6)
+$router->add('GET', '/admin/products', ProductController::class, 'adminIndex');
+$router->add('GET', '/admin/products/{id}', ProductController::class, 'adminShow');
+$router->add('POST', '/admin/products', ProductController::class, 'store');
+$router->add('PUT', '/admin/products/{id}', ProductController::class, 'update');
+$router->add('PUT', '/admin/products/{id}/active', ProductController::class, 'setActive');
+$router->add('PUT', '/admin/products/{id}/stock', ProductController::class, 'updateStock');
+$router->add('DELETE', '/admin/products/{id}', ProductController::class, 'destroy');
+
 // Cart and orders of the logged-in customer
 $router->add('GET', '/shipping', OrderController::class, 'shipping');
 $router->add('POST', '/orders', OrderController::class, 'store');
