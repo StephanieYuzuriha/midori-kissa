@@ -14,4 +14,12 @@ return [
         'flatRate' => 4.95,
         'freeFrom' => 50.00,
     ],
+
+    // Folder where the product photos uploaded from the admin panel are saved, and the URL
+    // where Apache serves them. In Docker the folder is a volume, so the photos are kept
+    // when the container is rebuilt
+    'uploads' => [
+        'dir' => '/var/www/uploads/products',
+        'url' => '/uploads/products',
+    ],
 ];

@@ -21,6 +21,15 @@ class ProductController extends Controller
     private const MAX_STOCK = 99999;
     private const GRADES = ['ceremonial', 'culinary'];
 
+    // Product photos (RS12): JPG, PNG or WebP of up to 2 MB. They are saved as WebP with their
+    // own proportions, reduced to 1200 px on the longest side if they are bigger
+    private const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    private const IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+    private const IMAGE_MAX_PIXELS = 16000000;
+    private const IMAGE_MAX_SIDE = 1200;
+    private const WEBP_QUALITY = 80;
+    private const MAX_IMAGES = 6;
+
     // Catalog: active products with category filter, search by name, sorting and pages (RF10–RF13).
     // Example: GET /api/products?category=1&search=uji&sort=price_asc&page=2
     public function index(): void
@@ -256,8 +265,131 @@ class ProductController extends Controller
             return;
         }
 
+        // The rows of its photos would be deleted by the database; the files are deleted here
+        foreach ($product->getMedia() as $media) {
+            $media->delete();
+        }
         $product->delete();
         Response::json(['message' => 'Producto eliminado']);
+    }
+
+    // Uploads a photo of a product (RF29, RS12). Form fields: image (the file) and altText,
+    // which is required (5.2: every product photo has a descriptive alternative text)
+    public function uploadImage(int $id): void
+    {
+        $this->auth->requireAdmin();
+
+        $product = Product::findById($id);
+        if ($product === null) {
+            Response::error('Producto no encontrado', 404);
+            return;
+        }
+
+        $errors = $this->validate($_POST, ['altText' => ['required', 'max:150']]);
+        $file = $_FILES['image'] ?? null;
+        $imageError = $this->checkImage($file);
+        if ($imageError !== null) {
+            $errors['image'] = $imageError;
+        } elseif (count($product->getMedia()) >= self::MAX_IMAGES) {
+            $errors['image'] = 'Cada producto puede tener como máximo ' . self::MAX_IMAGES . ' fotos.';
+        }
+        if ($errors) {
+            Response::json(['errors' => $errors], 422);
+            return;
+        }
+
+        $fileName = $this->saveAsWebp($file['tmp_name']);
+        if ($fileName === null) {
+            Response::json(['errors' => ['image' => 'No se ha podido procesar la foto. Prueba con otro archivo.']], 422);
+            return;
+        }
+
+        $config = require __DIR__ . '/../config/config.php';
+        $media = new Media();
+        $media->productId = $product->id;
+        $media->context = 'product';
+        $media->path = $config['uploads']['url'] . '/' . $fileName;
+        $media->altText = trim($_POST['altText']);
+        $media->save();
+
+        Response::json(['image' => $media->toArray()], 201);
+    }
+
+    // Deletes a photo of a product
+    public function deleteImage(int $id): void
+    {
+        $this->auth->requireAdmin();
+
+        $media = Media::findById($id);
+        if ($media === null || $media->productId === null) {
+            Response::error('Foto no encontrada', 404);
+            return;
+        }
+
+        $media->delete();
+        Response::json(['message' => 'Foto eliminada']);
+    }
+
+    // Checks the uploaded file: no upload errors, up to 2 MB, and a real JPG, PNG or WebP image.
+    // The type is read from the content of the file, not from its name or from the browser (RS12)
+    private function checkImage(mixed $file): ?string
+    {
+        if (!is_array($file) || !isset($file['error']) || !is_int($file['error'])) {
+            return 'Selecciona una foto.';
+        }
+        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+            return 'La foto no puede ocupar más de 2 MB.';
+        }
+        if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+            return 'No se ha podido subir la foto. Inténtalo de nuevo.';
+        }
+        if ($file['size'] > self::IMAGE_MAX_BYTES) {
+            return 'La foto no puede ocupar más de 2 MB.';
+        }
+
+        $type = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        $size = getimagesize($file['tmp_name']);
+        if (!in_array($type, self::IMAGE_TYPES, true) || $size === false) {
+            return 'La foto debe ser JPG, PNG o WebP.';
+        }
+        // Very big images would need too much memory to be converted
+        if ($size[0] * $size[1] > self::IMAGE_MAX_PIXELS) {
+            return 'La foto tiene demasiada resolución (máximo 16 megapíxeles).';
+        }
+
+        return null;
+    }
+
+    // Converts the photo to WebP with a random name and saves it in the uploads folder.
+    // It keeps the proportions and the transparency; it never makes small photos bigger
+    private function saveAsWebp(string $tmpFile): ?string
+    {
+        $image = @imagecreatefromstring(file_get_contents($tmpFile));
+        if ($image === false) {
+            return null;
+        }
+        imagepalettetotruecolor($image);
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $longestSide = max($width, $height);
+        if ($longestSide > self::IMAGE_MAX_SIDE) {
+            $ratio = self::IMAGE_MAX_SIDE / $longestSide;
+            $resized = imagescale($image, (int) round($width * $ratio), (int) round($height * $ratio));
+            imagedestroy($image);
+            if ($resized === false) {
+                return null;
+            }
+            $image = $resized;
+        }
+        imagesavealpha($image, true);
+
+        $config = require __DIR__ . '/../config/config.php';
+        $fileName = bin2hex(random_bytes(16)) . '.webp';
+        $saved = imagewebp($image, $config['uploads']['dir'] . '/' . $fileName, self::WEBP_QUALITY);
+        imagedestroy($image);
+
+        return $saved ? $fileName : null;
     }
 
     // Checks the data of the product form and copies it into the product (RS9).

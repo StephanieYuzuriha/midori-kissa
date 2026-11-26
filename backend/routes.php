@@ -40,6 +40,8 @@ $router->add('PUT', '/admin/products/{id}', ProductController::class, 'update');
 $router->add('PUT', '/admin/products/{id}/active', ProductController::class, 'setActive');
 $router->add('PUT', '/admin/products/{id}/stock', ProductController::class, 'updateStock');
 $router->add('DELETE', '/admin/products/{id}', ProductController::class, 'destroy');
+$router->add('POST', '/admin/products/{id}/images', ProductController::class, 'uploadImage');
+$router->add('DELETE', '/admin/images/{id}', ProductController::class, 'deleteImage');
 
 // Cart and orders of the logged-in customer
 $router->add('GET', '/shipping', OrderController::class, 'shipping');

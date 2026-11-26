@@ -12,6 +12,8 @@ services:
     volumes:
       # Mount the backend so code changes are visible without rebuilding
       - ./backend:/var/www/backend
+      # Product photos uploaded from the admin panel: they are kept when the container is rebuilt
+      - uploads:/var/www/uploads
     depends_on:
       # Wait until MySQL accepts connections
       db:
@@ -36,3 +38,4 @@ services:
 
 volumes:
   db_data:
+  uploads:
