@@ -53,4 +53,17 @@ class Auth
 
         return $user;
     }
+
+    // Returns the logged-in administrator or stops the request: 401 without a session
+    // and 403 if the user is a customer (RF28). Every admin route of the API calls it (RS6)
+    public function requireAdmin(): User
+    {
+        $user = $this->requireLogin();
+        if ($user->role !== 'admin') {
+            Response::error('No tienes permiso para realizar esta acción', 403);
+            exit;
+        }
+
+        return $user;
+    }
 }
