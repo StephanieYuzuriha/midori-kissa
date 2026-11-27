@@ -26,9 +26,9 @@
     <div class="row g-4 g-lg-5">
       <!-- Photo gallery (RI6) -->
       <div class="col-md-6">
-        <div class="ratio ratio-1x1 bg-body-tertiary rounded border overflow-hidden">
+        <div class="ratio ratio-1x1 bg-white rounded border overflow-hidden">
           @if (images().length > 0) {
-            <img [src]="images()[selectedImage()].path" [alt]="images()[selectedImage()].altText" class="w-100 h-100 object-fit-cover" />
+            <img [src]="images()[selectedImage()].path" [alt]="images()[selectedImage()].altText" class="w-100 h-100 object-fit-contain" />
           } @else {
             <div class="d-flex align-items-center justify-content-center text-body-secondary">Sin foto</div>
           }
@@ -45,7 +45,7 @@
                 [attr.aria-pressed]="index === selectedImage()"
                 (click)="selectImage(index)"
               >
-                <img [src]="image.path" [alt]="image.altText" width="72" height="72" class="d-block object-fit-cover" />
+                <img [src]="image.path" [alt]="image.altText" width="72" height="72" class="d-block object-fit-contain" />
               </button>
             }
           </div>

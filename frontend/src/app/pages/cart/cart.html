@@ -31,7 +31,7 @@
             <li class="card mb-3">
               <div class="card-body d-flex flex-wrap align-items-center gap-3">
                 @if (line.image) {
-                  <img [src]="line.image" alt="" width="80" height="80" class="rounded object-fit-cover" />
+                  <img [src]="line.image" alt="" width="80" height="80" class="rounded object-fit-contain" />
                 }
                 <div class="flex-grow-1">
                   <a [routerLink]="productUrl({ id: line.productId, name: line.name })" class="link-body-emphasis fw-semibold">

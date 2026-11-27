@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Product, ProductPage } from '../models/product';
+import { Product, ProductImage, ProductPage } from '../models/product';
 
 // Catalog filters. Empty values are not sent to the API
 export interface CatalogFilters {
@@ -18,6 +18,21 @@ export interface AdminProductFilters {
   status: string;
   stock: string;
   page: string;
+}
+
+// Data of the product form in the admin panel (RF29)
+export interface ProductData {
+  categoryId: number | null;
+  name: string;
+  description: string;
+  price: number | null;
+  weightGrams: number | null;
+  grade: 'ceremonial' | 'culinary' | null;
+  originRegion: string;
+  cultivar: string;
+  preparation: string;
+  stock: number | null;
+  isActive: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,6 +53,33 @@ export class ProductService {
   // Admin panel: all the products, hidden ones included (RF32)
   getAdminProducts(filters: AdminProductFilters): Observable<ProductPage> {
     return this.http.get<ProductPage>(this.adminUrl, { params: toParams(filters) });
+  }
+
+  // Any product with its photos, also a hidden one
+  getAdminProduct(id: number): Observable<Product> {
+    return this.http.get<{ product: Product }>(`${this.adminUrl}/${id}`).pipe(map((response) => response.product));
+  }
+
+  createProduct(data: ProductData): Observable<Product> {
+    return this.http.post<{ product: Product }>(this.adminUrl, data).pipe(map((response) => response.product));
+  }
+
+  updateProduct(id: number, data: ProductData): Observable<Product> {
+    return this.http.put<{ product: Product }>(`${this.adminUrl}/${id}`, data).pipe(map((response) => response.product));
+  }
+
+  // The photo goes as a form with the file, so the server can check its real type (RS12)
+  uploadProductImage(id: number, file: File, altText: string): Observable<ProductImage> {
+    const form = new FormData();
+    form.append('image', file);
+    form.append('altText', altText);
+    return this.http
+      .post<{ image: ProductImage }>(`${this.adminUrl}/${id}/images`, form)
+      .pipe(map((response) => response.image));
+  }
+
+  deleteProductImage(imageId: number): Observable<void> {
+    return this.http.delete<unknown>(`/api/admin/images/${imageId}`).pipe(map(() => undefined));
   }
 
   // Publishes or hides the product in the shop (RF30)

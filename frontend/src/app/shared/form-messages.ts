@@ -20,6 +20,18 @@ export function postalCodeValidator(control: AbstractControl): ValidationErrors 
   return value === '' || /^[0-9]{5}$/.test(value) ? null : { postalCode: true };
 }
 
+// Whole number (stock, grams). Empty is left to Validators.required
+export function integerValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  return value === null || value === '' || Number.isInteger(value) ? null : { integer: true };
+}
+
+// Amount in euros with two decimals at most, as the price column of the database
+export function priceValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  return value === null || value === '' || Math.round(value * 100) / 100 === value ? null : { decimals: true };
+}
+
 // Message shown under a form field, with the same texts as the backend
 export function getFieldError(control: AbstractControl | null): string {
   const errors = control?.errors;
@@ -40,6 +52,18 @@ export function getFieldError(control: AbstractControl | null): string {
   }
   if (errors['postalCode']) {
     return 'El código postal debe tener 5 cifras.';
+  }
+  if (errors['integer']) {
+    return 'Escribe un número entero.';
+  }
+  if (errors['decimals']) {
+    return 'Como máximo dos decimales.';
+  }
+  if (errors['min']) {
+    return `El valor mínimo es ${errors['min'].min}.`;
+  }
+  if (errors['max']) {
+    return `El valor máximo es ${errors['max'].max}.`;
   }
   // Error sent by the API for this field (422)
   if (errors['server']) {

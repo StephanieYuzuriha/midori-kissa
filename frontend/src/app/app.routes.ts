@@ -3,6 +3,7 @@ import { adminGuard } from './guards/admin.guard';
 import { authGuard } from './guards/auth.guard';
 import { Account } from './pages/account/account';
 import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
+import { AdminProductForm } from './pages/admin/admin-product-form/admin-product-form';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
 import { Cart } from './pages/cart/cart';
 import { Catalog } from './pages/catalog/catalog';
@@ -50,6 +51,8 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'productos', pathMatch: 'full' },
       { path: 'productos', component: AdminProducts, title: 'Productos | Panel de Midori Kissa' },
+      { path: 'productos/nuevo', component: AdminProductForm, title: 'Nuevo producto | Panel de Midori Kissa' },
+      { path: 'productos/:id', component: AdminProductForm, title: 'Editar producto | Panel de Midori Kissa' },
     ],
   },
   { path: '**', redirectTo: '' },

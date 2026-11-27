@@ -61,9 +61,10 @@
       <div class="col">
         <!-- Card with photo, name, grade and price (RI5) -->
         <article class="card h-100">
-          <div class="ratio ratio-1x1 bg-body-tertiary">
+          <!-- The whole photo inside the square, without cutting it; the empty space stays white -->
+          <div class="ratio ratio-1x1 bg-white">
             @if (product.image) {
-              <img [src]="product.image" [alt]="product.name" class="card-img-top" loading="lazy" />
+              <img [src]="product.image" [alt]="product.name" class="card-img-top object-fit-contain" loading="lazy" />
             }
           </div>
           <div class="card-body d-flex flex-column">

@@ -37,7 +37,7 @@
       @for (line of cart.lines(); track line.productId) {
         <li class="d-flex gap-3 py-2 border-bottom">
           @if (line.image) {
-            <img [src]="line.image" alt="" width="56" height="56" class="rounded object-fit-cover flex-shrink-0" />
+            <img [src]="line.image" alt="" width="56" height="56" class="rounded object-fit-contain flex-shrink-0" />
           }
           <div class="flex-grow-1">
             <a [routerLink]="productUrl({ id: line.productId, name: line.name })" class="link-body-emphasis">{{ line.name }}</a>

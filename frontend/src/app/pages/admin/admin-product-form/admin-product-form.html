@@ -1,0 +1,299 @@
+<nav aria-label="Ruta de navegación">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink="/admin/productos">Productos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ productId() ? 'Editar producto' : 'Nuevo producto' }}</li>
+  </ol>
+</nav>
+
+<h1 class="h2 mb-4">{{ productId() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+
+@if (successMessage()) {
+  <div class="alert alert-success" role="status">{{ successMessage() }}</div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+}
+
+@if (notFound()) {
+  <p>Producto no encontrado.</p>
+  <a routerLink="/admin/productos" class="btn btn-outline-secondary">Volver a productos</a>
+} @else if (isLoading()) {
+  <p role="status">Cargando producto…</p>
+} @else {
+  <!-- Data of the product (RF29) -->
+  <section class="card mb-4" aria-labelledby="data-title">
+    <div class="card-body">
+      <h2 id="data-title" class="h5 mb-3">Datos del producto</h2>
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="row">
+    <div class="col-md-8 mb-3">
+      <label for="name" class="form-label">Nombre</label>
+      <input
+        id="name"
+        type="text"
+        class="form-control"
+        formControlName="name"
+        autocomplete="off"
+        [class.is-invalid]="isInvalid('name')"
+        [attr.aria-invalid]="isInvalid('name')"
+        [attr.aria-describedby]="isInvalid('name') ? 'name-error' : null"
+      />
+      @if (isInvalid('name')) {
+        <div id="name-error" class="invalid-feedback">{{ errorFor('name') }}</div>
+      }
+    </div>
+    <div class="col-md-4 mb-3">
+      <label for="categoryId" class="form-label">Categoría</label>
+      <select
+        id="categoryId"
+        class="form-select"
+        formControlName="categoryId"
+        [class.is-invalid]="isInvalid('categoryId')"
+        [attr.aria-invalid]="isInvalid('categoryId')"
+        [attr.aria-describedby]="isInvalid('categoryId') ? 'categoryId-error' : null"
+      >
+        <option [ngValue]="null" disabled>Elige una categoría</option>
+        @for (category of categories(); track category.id) {
+          <option [ngValue]="category.id">{{ category.name }}</option>
+        }
+      </select>
+      @if (isInvalid('categoryId')) {
+        <div id="categoryId-error" class="invalid-feedback">{{ errorFor('categoryId') }}</div>
+      }
+    </div>
+    <div class="col-12 mb-3">
+      <label for="description" class="form-label">Descripción</label>
+      <textarea
+        id="description"
+        class="form-control"
+        rows="4"
+        formControlName="description"
+        [class.is-invalid]="isInvalid('description')"
+        [attr.aria-invalid]="isInvalid('description')"
+        [attr.aria-describedby]="isInvalid('description') ? 'description-error' : null"
+      ></textarea>
+      @if (isInvalid('description')) {
+        <div id="description-error" class="invalid-feedback">{{ errorFor('description') }}</div>
+      }
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-3">
+      <label for="price" class="form-label">Precio (€)</label>
+      <input
+        id="price"
+        type="number"
+        class="form-control"
+        formControlName="price"
+        min="0.01"
+        step="0.01"
+        [class.is-invalid]="isInvalid('price')"
+        [attr.aria-invalid]="isInvalid('price')"
+        [attr.aria-describedby]="isInvalid('price') ? 'price-error' : null"
+      />
+      @if (isInvalid('price')) {
+        <div id="price-error" class="invalid-feedback">{{ errorFor('price') }}</div>
+      }
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-3">
+      <label for="stock" class="form-label">Stock (unidades)</label>
+      <input
+        id="stock"
+        type="number"
+        class="form-control"
+        formControlName="stock"
+        min="0"
+        step="1"
+        [class.is-invalid]="isInvalid('stock')"
+        [attr.aria-invalid]="isInvalid('stock')"
+        [attr.aria-describedby]="isInvalid('stock') ? 'stock-error' : null"
+      />
+      @if (isInvalid('stock')) {
+        <div id="stock-error" class="invalid-feedback">{{ errorFor('stock') }}</div>
+      }
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-3">
+      <label for="weightGrams" class="form-label">Formato (gramos)</label>
+      <input
+        id="weightGrams"
+        type="number"
+        class="form-control"
+        formControlName="weightGrams"
+        min="1"
+        step="1"
+        [class.is-invalid]="isInvalid('weightGrams')"
+        [attr.aria-invalid]="isInvalid('weightGrams')"
+        [attr.aria-describedby]="isInvalid('weightGrams') ? 'weightGrams-error' : 'weightGrams-help'"
+      />
+      <div id="weightGrams-help" class="form-text">Opcional. Por ejemplo, 30.</div>
+      @if (isInvalid('weightGrams')) {
+        <div id="weightGrams-error" class="invalid-feedback">{{ errorFor('weightGrams') }}</div>
+      }
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-3">
+      <label for="grade" class="form-label">Grado</label>
+      <select id="grade" class="form-select" formControlName="grade" aria-describedby="grade-help">
+        <option value="">Sin grado</option>
+        <option value="ceremonial">Ceremonial</option>
+        <option value="culinary">Culinario</option>
+      </select>
+      <div id="grade-help" class="form-text">Solo para el matcha.</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="originRegion" class="form-label">Región de origen</label>
+      <input
+        id="originRegion"
+        type="text"
+        class="form-control"
+        formControlName="originRegion"
+        [class.is-invalid]="isInvalid('originRegion')"
+        [attr.aria-invalid]="isInvalid('originRegion')"
+        [attr.aria-describedby]="isInvalid('originRegion') ? 'originRegion-error' : 'originRegion-help'"
+      />
+      <div id="originRegion-help" class="form-text">Opcional. Por ejemplo, Uji (Kioto).</div>
+      @if (isInvalid('originRegion')) {
+        <div id="originRegion-error" class="invalid-feedback">{{ errorFor('originRegion') }}</div>
+      }
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="cultivar" class="form-label">Cultivar</label>
+      <input
+        id="cultivar"
+        type="text"
+        class="form-control"
+        formControlName="cultivar"
+        [class.is-invalid]="isInvalid('cultivar')"
+        [attr.aria-invalid]="isInvalid('cultivar')"
+        [attr.aria-describedby]="isInvalid('cultivar') ? 'cultivar-error' : 'cultivar-help'"
+      />
+      <div id="cultivar-help" class="form-text">Opcional. Por ejemplo, Okumidori.</div>
+      @if (isInvalid('cultivar')) {
+        <div id="cultivar-error" class="invalid-feedback">{{ errorFor('cultivar') }}</div>
+      }
+    </div>
+    <div class="col-12 mb-3">
+      <label for="preparation" class="form-label">Modo de preparación</label>
+      <textarea
+        id="preparation"
+        class="form-control"
+        rows="3"
+        formControlName="preparation"
+        [class.is-invalid]="isInvalid('preparation')"
+        [attr.aria-invalid]="isInvalid('preparation')"
+        [attr.aria-describedby]="isInvalid('preparation') ? 'preparation-error' : 'preparation-help'"
+      ></textarea>
+      <div id="preparation-help" class="form-text">Opcional.</div>
+      @if (isInvalid('preparation')) {
+        <div id="preparation-error" class="invalid-feedback">{{ errorFor('preparation') }}</div>
+      }
+    </div>
+        </div>
+
+        <div class="form-check mb-4">
+          <input id="isActive" type="checkbox" class="form-check-input" formControlName="isActive" aria-describedby="isActive-help" />
+          <label for="isActive" class="form-check-label">Publicado en la tienda</label>
+          <div id="isActive-help" class="form-text">Si no está marcado, el producto queda oculto y los clientes no lo ven.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+            {{ isSaving() ? 'Guardando…' : productId() ? 'Guardar cambios' : 'Crear producto' }}
+          </button>
+          <a routerLink="/admin/productos" class="btn btn-outline-secondary">Volver a productos</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Photos of the product (RF29, RS12): only once the product exists -->
+  <section class="card" aria-labelledby="photos-title">
+    <div class="card-body">
+      <h2 id="photos-title" class="h5 mb-2">Fotos</h2>
+      @if (!productId()) {
+        <p class="mb-0 text-body-secondary">Podrás añadir las fotos después de crear el producto.</p>
+      } @else {
+        <p class="text-body-secondary small">
+          La primera foto es la que se ve en el catálogo. Hasta {{ maxImages }} fotos en JPG, PNG o WebP de 2 MB como máximo:
+          se guardan en WebP sin recortar.
+        </p>
+
+        @if (images().length === 0) {
+          <p>Este producto todavía no tiene fotos.</p>
+        } @else {
+          <ul class="list-unstyled row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-3 mb-4">
+            @for (image of images(); track image.id; let first = $first) {
+              <li class="col">
+                <figure class="mb-0">
+                  <!-- The whole photo inside a square, without cutting or stretching it -->
+                  <div class="ratio ratio-1x1 border rounded bg-white">
+                    <img [src]="image.path" [alt]="image.altText" class="object-fit-contain p-1" />
+                  </div>
+                  <figcaption class="small mt-1">
+                    @if (first) {
+                      <span class="badge text-bg-light border me-1">Principal</span>
+                    }
+                    {{ image.altText }}
+                  </figcaption>
+                </figure>
+                <button type="button" class="btn btn-outline-danger btn-sm mt-1" (click)="askDeleteImage(image)">
+                  Eliminar foto<span class="visually-hidden">: {{ image.altText }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (images().length >= maxImages) {
+          <p class="mb-0">Este producto ya tiene {{ maxImages }} fotos. Elimina alguna para añadir otra.</p>
+        } @else {
+          <form (submit)="$event.preventDefault(); uploadImage(fileInput)" novalidate class="row g-3 align-items-start">
+            <div class="col-md-5">
+              <label for="image" class="form-label">Foto</label>
+              <input
+                #fileInput
+                id="image"
+                type="file"
+                class="form-control"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="selectFile(fileInput)"
+                [class.is-invalid]="fileError()"
+                [attr.aria-invalid]="!!fileError()"
+                [attr.aria-describedby]="fileError() ? 'image-error' : null"
+              />
+              @if (fileError()) {
+                <div id="image-error" class="invalid-feedback">{{ fileError() }}</div>
+              }
+            </div>
+            <div class="col-md-5">
+              <label for="altText" class="form-label">Texto alternativo</label>
+              <input
+                id="altText"
+                type="text"
+                class="form-control"
+                [formControl]="altText"
+                [class.is-invalid]="altText.invalid && altText.touched"
+                [attr.aria-invalid]="altText.invalid && altText.touched"
+                [attr.aria-describedby]="altText.invalid && altText.touched ? 'altText-error' : 'altText-help'"
+              />
+              <div id="altText-help" class="form-text">Describe la foto para quien no puede verla. Por ejemplo: «Bote de matcha abierto».</div>
+              @if (altText.invalid && altText.touched) {
+                <div id="altText-error" class="invalid-feedback">{{ altTextError() }}</div>
+              }
+            </div>
+            <div class="col-md-2 pt-md-4 mt-md-2">
+              <button type="submit" class="btn btn-outline-secondary w-100" [disabled]="isUploading()">
+                {{ isUploading() ? 'Subiendo…' : 'Subir foto' }}
+              </button>
+            </div>
+          </form>
+        }
+      }
+    </div>
+  </section>
+}
+
+<app-confirm-dialog
+  #deleteDialog
+  title="Eliminar foto"
+  [message]="'¿Seguro que quieres eliminar la foto «' + (imageToDelete()?.altText ?? '') + '»? No se puede deshacer.'"
+  confirmLabel="Eliminar"
+  (confirmed)="deleteImage()"
+/>
