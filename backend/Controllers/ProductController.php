@@ -455,15 +455,6 @@ class ProductController extends Controller
         return [];
     }
 
-    // Value of a query string parameter without spaces at the ends, '' if it is missing,
-    // or null if it is not a text (for example ?search[]=x)
-    private function queryParam(string $name): ?string
-    {
-        $value = $_GET[$name] ?? '';
-
-        return is_string($value) ? trim($value) : null;
-    }
-
     private function categoryExists(string $category): bool
     {
         $id = filter_var($category, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);

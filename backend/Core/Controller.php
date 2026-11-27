@@ -29,6 +29,15 @@ abstract class Controller
         return is_array($data) ? $data : [];
     }
 
+    // Value of a query string parameter without spaces at the ends, '' if it is missing,
+    // or null if it is not a text (for example ?search[]=x)
+    protected function queryParam(string $name): ?string
+    {
+        $value = $_GET[$name] ?? '';
+
+        return is_string($value) ? trim($value) : null;
+    }
+
     // Empty optional fields are stored as NULL
     protected function optionalText(array $data, string $field): ?string
     {

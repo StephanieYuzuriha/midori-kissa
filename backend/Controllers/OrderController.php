@@ -8,6 +8,8 @@ use App\Core\Controller;
 use App\Core\Response;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
+use DateTime;
 use DomainException;
 
 // Orders of the logged-in customer. The customer always comes from the session,
@@ -16,6 +18,7 @@ class OrderController extends Controller
 {
     private const MAX_LINES = 50;
     private const MAX_QUANTITY = 99;
+    private const MAX_PAGE = 1000;
 
     // Shipping rates to show the costs in the cart (RF19). The server calculates them again when ordering
     public function shipping(): void
@@ -89,6 +92,132 @@ class OrderController extends Controller
         }
 
         Response::json(['order' => $order->toArray()]);
+    }
+
+    // Admin panel: all the orders with filters by status and dates and pages (RF33).
+    // Example: GET /api/admin/orders?status=paid&from=2026-12-01&to=2026-12-31&page=1
+    public function index(): void
+    {
+        $this->auth->requireAdmin();
+
+        $status = $this->queryParam('status');
+        $from = $this->queryParam('from');
+        $to = $this->queryParam('to');
+        $page = $this->queryParam('page');
+
+        $errors = [];
+        if ($status === null || ($status !== '' && !array_key_exists($status, Order::STATUS_LABELS))) {
+            $errors['status'] = 'El estado no es válido.';
+        }
+        if ($from === null || ($from !== '' && !$this->isDate($from))) {
+            $errors['from'] = 'La fecha no es válida.';
+        }
+        if ($to === null || ($to !== '' && !$this->isDate($to))) {
+            $errors['to'] = 'La fecha no es válida.';
+        }
+        if (!$errors && $from !== '' && $to !== '' && $from > $to) {
+            $errors['to'] = 'La fecha final no puede ser anterior a la inicial.';
+        }
+        $pageNumber = $page === '' ? 1 : filter_var($page, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => self::MAX_PAGE],
+        ]);
+        if ($pageNumber === false) {
+            $errors['page'] = 'La página no es válida.';
+        }
+        if ($errors) {
+            Response::json(['errors' => $errors], 422);
+            return;
+        }
+
+        $result = Order::findAll($status ?: null, $from ?: null, $to ?: null, $pageNumber);
+
+        Response::json([
+            'orders' => array_map(fn(Order $order) => $order->toArray() + ['customer' => $order->customer], $result['orders']),
+            'total' => $result['total'],
+            'page' => $pageNumber,
+            'pages' => (int) ceil($result['total'] / Order::ADMIN_PER_PAGE),
+        ]);
+    }
+
+    // Admin panel: detail of any order with the customer data
+    public function adminShow(string $orderNumber): void
+    {
+        $this->auth->requireAdmin();
+
+        $order = Order::findByOrderNumber($orderNumber);
+        if ($order === null) {
+            Response::error('Pedido no encontrado', 404);
+            return;
+        }
+
+        Response::json(['order' => $this->adminOrderData($order)]);
+    }
+
+    // Changes the status of an order (RF34). Body: {"status": "shipped"}.
+    // Allowed: Pagado → Enviado → Entregado, and cancel a pending order, which returns the stock
+    public function changeStatus(string $orderNumber): void
+    {
+        $this->auth->requireAdmin();
+
+        $order = Order::findByOrderNumber($orderNumber);
+        if ($order === null) {
+            Response::error('Pedido no encontrado', 404);
+            return;
+        }
+
+        $status = $this->readJson()['status'] ?? null;
+        if (!is_string($status) || !array_key_exists($status, Order::STATUS_LABELS)) {
+            Response::json(['errors' => ['status' => 'El estado no es válido.']], 422);
+            return;
+        }
+
+        if ($status === 'cancelled') {
+            $changed = $order->cancel();
+        } elseif ((Order::NEXT_STATUS[$order->status] ?? null) === $status) {
+            $changed = $order->changeStatus($status);
+        } else {
+            $changed = false;
+        }
+        if (!$changed) {
+            $current = Order::findByOrderNumber($orderNumber);
+            $message = $status === 'cancelled' && $current->status !== 'cancelled'
+                ? 'Solo se pueden cancelar los pedidos pendientes de pago. Un pedido pagado necesita un reembolso, que no se gestiona desde la tienda.'
+                : 'Un pedido «' . Order::STATUS_LABELS[$current->status] . '» no se puede pasar a «' . Order::STATUS_LABELS[$status] . '».';
+            Response::error($message, 409);
+            return;
+        }
+
+        Response::json(['order' => $this->adminOrderData(Order::findByOrderNumber($orderNumber))]);
+    }
+
+    // Order data for the panel: the order, the customer and the next statuses it can have
+    private function adminOrderData(Order $order): array
+    {
+        $user = User::findById($order->userId);
+        $next = [];
+        if (isset(Order::NEXT_STATUS[$order->status])) {
+            $next[] = Order::NEXT_STATUS[$order->status];
+        }
+        if ($order->status === 'pending_payment') {
+            $next[] = 'cancelled';
+        }
+
+        return $order->toArray() + [
+            'customer' => [
+                'name' => $user->firstName . ' ' . $user->lastName,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ],
+            'nextStatuses' => $next,
+        ];
+    }
+
+    // Date in the format YYYY-MM-DD that exists in the calendar
+    private function isDate(string $value): bool
+    {
+        $date = DateTime::createFromFormat('!Y-m-d', $value);
+
+        return $date !== false && $date->format('Y-m-d') === $value;
     }
 
     // Lines of the cart: a list of {productId, quantity} with whole numbers, without repeated

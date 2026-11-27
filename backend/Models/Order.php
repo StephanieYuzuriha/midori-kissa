@@ -10,6 +10,26 @@ use Throwable;
 
 class Order extends Model
 {
+    // Order statuses (RI12) and their names in Spanish
+    public const STATUS_LABELS = [
+        'pending_payment' => 'Pendiente de pago',
+        'paid' => 'Pagado',
+        'shipped' => 'Enviado',
+        'delivered' => 'Entregado',
+        'cancelled' => 'Cancelado',
+    ];
+
+    // Changes that the administrator can make by hand (RF34): a paid order is shipped and
+    // then delivered. "Paid" is only set after checking the payment with Stripe (RS14),
+    // and only pending orders can be cancelled, because a paid one would need a refund
+    public const NEXT_STATUS = [
+        'paid' => 'shipped',
+        'shipped' => 'delivered',
+    ];
+
+    // Orders per page in the admin panel
+    public const ADMIN_PER_PAGE = 20;
+
     public int $id = 0;
     // Public number that the customer sees, for example MK-2027-7F3K9Q
     public string $orderNumber = '';
@@ -24,6 +44,8 @@ class Order extends Model
     public ?string $stripeSessionId = null;
     /** @var OrderItem[] */
     public array $items = [];
+    // Name and email of the customer, only in the admin list
+    public ?array $customer = null;
 
     // Shipping rates from the configuration (RF19)
     public static function shippingRates(): array
@@ -137,6 +159,105 @@ class Order extends Model
         $stmt->execute([$userId]);
 
         return array_map(fn(array $row) => self::fromRow($row), $stmt->fetchAll());
+    }
+
+    // All the orders for the admin panel, newest first, filtered by status and dates (RF33).
+    // $from and $to are dates YYYY-MM-DD already checked by the controller; both days are included
+    public static function findAll(?string $status, ?string $from, ?string $to, int $page): array
+    {
+        $conditions = ['1 = 1'];
+        $params = [];
+        if ($status !== null) {
+            $conditions[] = 'o.status = ?';
+            $params[] = $status;
+        }
+        if ($from !== null) {
+            $conditions[] = 'o.created_at >= ?';
+            $params[] = $from . ' 00:00:00';
+        }
+        if ($to !== null) {
+            $conditions[] = 'o.created_at < DATE_ADD(?, INTERVAL 1 DAY)';
+            $params[] = $to;
+        }
+        $where = implode(' AND ', $conditions);
+
+        $pdo = Database::getConnection();
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM orders o WHERE $where");
+        $stmt->execute($params);
+        $total = (int) $stmt->fetchColumn();
+
+        $offset = ($page - 1) * self::ADMIN_PER_PAGE;
+        $stmt = $pdo->prepare(
+            "SELECT o.*, u.first_name, u.last_name, u.email
+             FROM orders o
+             JOIN users u ON u.id = o.user_id
+             WHERE $where
+             ORDER BY o.created_at DESC, o.id DESC
+             LIMIT " . self::ADMIN_PER_PAGE . " OFFSET $offset"
+        );
+        $stmt->execute($params);
+        $orders = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $order = self::fromRow($row);
+            $order->customer = ['name' => $row['first_name'] . ' ' . $row['last_name'], 'email' => $row['email']];
+            $orders[] = $order;
+        }
+
+        return ['orders' => $orders, 'total' => $total];
+    }
+
+    // Changes the status only if the order is still in the status it had when it was read.
+    // So two changes at the same time cannot overwrite each other (RF34)
+    public function changeStatus(string $newStatus): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE orders SET status = ? WHERE id = ? AND status = ?');
+        $stmt->execute([$newStatus, $this->id, $this->status]);
+        if ($stmt->rowCount() !== 1) {
+            return false;
+        }
+
+        $this->status = $newStatus;
+
+        return true;
+    }
+
+    /**
+     * Cancels an order that is still pending payment and puts its units back in the stock
+     * (RF23, RF34). Both things are done in one transaction. The UPDATE only changes the order
+     * if it is still pending, so if it is cancelled twice the units are only returned once.
+     * Returns false if the order was not pending.
+     */
+    public function cancel(): bool
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $stmt = $this->pdo->prepare(
+                "UPDATE orders SET status = 'cancelled' WHERE id = ? AND status = 'pending_payment'"
+            );
+            $stmt->execute([$this->id]);
+            if ($stmt->rowCount() !== 1) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            $stmt = $this->pdo->prepare(
+                'UPDATE products p
+                 JOIN order_items oi ON oi.product_id = p.id
+                 SET p.stock = p.stock + oi.quantity
+                 WHERE oi.order_id = ?'
+            );
+            $stmt->execute([$this->id]);
+
+            $this->pdo->commit();
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+
+        $this->status = 'cancelled';
+
+        return true;
     }
 
     public function toArray(): array

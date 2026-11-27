@@ -43,6 +43,17 @@ $router->add('DELETE', '/admin/products/{id}', ProductController::class, 'destro
 $router->add('POST', '/admin/products/{id}/images', ProductController::class, 'uploadImage');
 $router->add('DELETE', '/admin/images/{id}', ProductController::class, 'deleteImage');
 
+// Admin panel: categories (RF31)
+$router->add('GET', '/admin/categories', CategoryController::class, 'adminIndex');
+$router->add('POST', '/admin/categories', CategoryController::class, 'store');
+$router->add('PUT', '/admin/categories/{id}', CategoryController::class, 'update');
+$router->add('DELETE', '/admin/categories/{id}', CategoryController::class, 'destroy');
+
+// Admin panel: orders (RF33, RF34)
+$router->add('GET', '/admin/orders', OrderController::class, 'index');
+$router->add('GET', '/admin/orders/{orderNumber}', OrderController::class, 'adminShow');
+$router->add('PUT', '/admin/orders/{orderNumber}/status', OrderController::class, 'changeStatus');
+
 // Cart and orders of the logged-in customer
 $router->add('GET', '/shipping', OrderController::class, 'shipping');
 $router->add('POST', '/orders', OrderController::class, 'store');
