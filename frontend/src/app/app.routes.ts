@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './guards/admin.guard';
 import { authGuard } from './guards/auth.guard';
 import { Account } from './pages/account/account';
+import { AdminCategories } from './pages/admin/admin-categories/admin-categories';
 import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
 import { AdminProductForm } from './pages/admin/admin-product-form/admin-product-form';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
@@ -53,6 +54,7 @@ export const routes: Routes = [
       { path: 'productos', component: AdminProducts, title: 'Productos | Panel de Midori Kissa' },
       { path: 'productos/nuevo', component: AdminProductForm, title: 'Nuevo producto | Panel de Midori Kissa' },
       { path: 'productos/:id', component: AdminProductForm, title: 'Editar producto | Panel de Midori Kissa' },
+      { path: 'categorias', component: AdminCategories, title: 'Categorías | Panel de Midori Kissa' },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -1,0 +1,105 @@
+<h1 class="h2 mb-4">Categorías</h1>
+
+@if (successMessage()) {
+  <div class="alert alert-success" role="status">{{ successMessage() }}</div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+}
+
+<!-- New category or changes in one (RF31) -->
+<section class="card mb-4" aria-labelledby="category-form-title">
+  <div class="card-body">
+    <h2 id="category-form-title" class="h5 mb-3">
+      {{ editing() ? 'Editar «' + editing()!.name + '»' : 'Nueva categoría' }}
+    </h2>
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="row">
+        <div class="col-md-5 mb-3">
+          <label for="category-name" class="form-label">Nombre</label>
+          <input
+            #nameInput
+            id="category-name"
+            type="text"
+            class="form-control"
+            formControlName="name"
+            [class.is-invalid]="isInvalid('name')"
+            [attr.aria-invalid]="isInvalid('name')"
+            [attr.aria-describedby]="isInvalid('name') ? 'category-name-error' : null"
+          />
+          @if (isInvalid('name')) {
+            <div id="category-name-error" class="invalid-feedback">{{ errorFor('name') }}</div>
+          }
+        </div>
+        <div class="col-md-7 mb-3">
+          <label for="category-description" class="form-label">Descripción</label>
+          <input
+            id="category-description"
+            type="text"
+            class="form-control"
+            formControlName="description"
+            [class.is-invalid]="isInvalid('description')"
+            [attr.aria-invalid]="isInvalid('description')"
+            [attr.aria-describedby]="isInvalid('description') ? 'category-description-error' : 'category-description-help'"
+          />
+          <div id="category-description-help" class="form-text">Opcional.</div>
+          @if (isInvalid('description')) {
+            <div id="category-description-error" class="invalid-feedback">{{ errorFor('description') }}</div>
+          }
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          {{ isSaving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear categoría' }}
+        </button>
+        @if (editing()) {
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()">Cancelar</button>
+        }
+      </div>
+    </form>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <p role="status">Cargando categorías…</p>
+} @else {
+  <div class="table-responsive position-relative">
+    <table class="table align-middle bg-white">
+      <caption class="visually-hidden">Categorías de la tienda</caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Descripción</th>
+          <th scope="col" class="text-end">Productos</th>
+          <th scope="col"><span class="visually-hidden">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categories(); track category.id) {
+          <tr>
+            <td class="fw-semibold">{{ category.name }}</td>
+            <td class="text-body-secondary">{{ category.description }}</td>
+            <td class="text-end">{{ category.productCount }}</td>
+            <td class="text-end text-nowrap">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="edit(category)">
+                Editar<span class="visually-hidden"> {{ category.name }}</span>
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm ms-1" (click)="askDelete(category)">
+                Eliminar<span class="visually-hidden"> {{ category.name }}</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="small text-body-secondary">Una categoría solo se puede eliminar si no tiene productos.</p>
+}
+
+<app-confirm-dialog
+  #deleteDialog
+  title="Eliminar categoría"
+  [message]="'¿Seguro que quieres eliminar la categoría «' + (categoryToDelete()?.name ?? '') + '»?'"
+  confirmLabel="Eliminar"
+  (confirmed)="deleteCategory()"
+/>
