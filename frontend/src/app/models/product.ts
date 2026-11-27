@@ -1,5 +1,6 @@
 // Product photo (Media::toArray())
 export interface ProductImage {
+  id: number;
   path: string;
   altText: string;
 }
@@ -18,8 +19,12 @@ export interface Product {
   cultivar: string | null;
   preparation: string | null;
   stock: number;
+  // false = hidden: it does not appear in the shop (RF30)
+  isActive: boolean;
   // First photo, used in the catalog cards
   image: string | null;
+  // Fewer than 5 units, only in the admin list (RF32)
+  lowStock?: boolean;
   // All the photos, only in the product page
   images?: ProductImage[];
 }

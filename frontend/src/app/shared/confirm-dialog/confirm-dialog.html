@@ -1,0 +1,11 @@
+<dialog #dialog class="confirm-dialog" [attr.aria-labelledby]="titleId">
+  <div class="p-4">
+    <h2 [id]="titleId" class="h5 mb-3">{{ title() }}</h2>
+    <p class="mb-4">{{ message() }}</p>
+    <div class="d-flex flex-wrap justify-content-end gap-2">
+      <!-- The first button gets the focus, so pressing Enter by mistake does not delete anything -->
+      <button type="button" class="btn btn-outline-secondary" (click)="close()">Volver</button>
+      <button type="button" class="btn btn-danger" (click)="confirm()">{{ confirmLabel() }}</button>
+    </div>
+  </div>
+</dialog>

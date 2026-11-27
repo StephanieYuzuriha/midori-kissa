@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './guards/admin.guard';
 import { authGuard } from './guards/auth.guard';
 import { Account } from './pages/account/account';
+import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
+import { AdminProducts } from './pages/admin/admin-products/admin-products';
 import { Cart } from './pages/cart/cart';
 import { Catalog } from './pages/catalog/catalog';
 import { Checkout } from './pages/checkout/checkout';
@@ -39,5 +42,15 @@ export const routes: Routes = [
     title: 'Detalle del pedido | Midori Kissa',
   },
   { path: 'politica-de-privacidad', component: PrivacyPolicy, title: 'Política de privacidad | Midori Kissa' },
+  // Admin panel, only for the administrator (RF28)
+  {
+    path: 'admin',
+    component: AdminLayout,
+    canActivate: [adminGuard],
+    children: [
+      { path: '', redirectTo: 'productos', pathMatch: 'full' },
+      { path: 'productos', component: AdminProducts, title: 'Productos | Panel de Midori Kissa' },
+    ],
+  },
   { path: '**', redirectTo: '' },
 ];

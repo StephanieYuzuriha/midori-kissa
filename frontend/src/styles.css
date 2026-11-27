@@ -235,3 +235,27 @@ h1, h2, h3, h4, h5, h6,
   background-color: var(--mk-green);
   color: #fff;
 }
+
+/* Admin panel: side menu (RI11) */
+.admin-menu .nav-link {
+  color: var(--bs-body-color);
+}
+
+.admin-menu .nav-link.active {
+  background-color: var(--mk-green);
+  color: #fff;
+}
+
+/* Confirmation window (RI13), made with the <dialog> element */
+.confirm-dialog {
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 40, 0.25);
+}
+
+.confirm-dialog::backdrop {
+  background-color: rgba(43, 43, 40, 0.5);
+}

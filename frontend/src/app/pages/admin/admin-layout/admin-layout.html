@@ -1,0 +1,20 @@
+<div class="row g-4">
+  <nav class="col-lg-3 col-xl-2" aria-label="Panel de administración">
+    <p class="h6 text-body-secondary mb-2">Panel de administración</p>
+    <ul class="nav nav-pills flex-lg-column gap-1 admin-menu">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="productos" routerLinkActive="active" ariaCurrentWhenActive="page">Productos</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="categorias" routerLinkActive="active" ariaCurrentWhenActive="page">Categorías</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="pedidos" routerLinkActive="active" ariaCurrentWhenActive="page">Pedidos</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="col-lg-9 col-xl-10">
+    <router-outlet />
+  </div>
+</div>

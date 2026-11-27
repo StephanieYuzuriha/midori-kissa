@@ -1,0 +1,140 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="h2 mb-0">Productos</h1>
+  <a routerLink="/admin/productos/nuevo" class="btn btn-primary">Nuevo producto</a>
+</div>
+
+<!-- Search and filters (RI11) -->
+<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="row g-3 align-items-end mb-4" role="search">
+  <div class="col-md-6 col-xl-4">
+    <label for="admin-search" class="form-label">Buscar por nombre</label>
+    <input id="admin-search" type="search" class="form-control" formControlName="search" maxlength="100" />
+  </div>
+  <div class="col-sm-6 col-md-3 col-xl-2">
+    <label for="admin-category" class="form-label">Categoría</label>
+    <select id="admin-category" class="form-select" formControlName="category">
+      <option value="">Todas</option>
+      @for (category of categories(); track category.id) {
+        <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="col-sm-6 col-md-3 col-xl-2">
+    <label for="admin-status" class="form-label">Estado</label>
+    <select id="admin-status" class="form-select" formControlName="status">
+      <option value="">Todos</option>
+      <option value="active">Publicados</option>
+      <option value="hidden">Ocultos</option>
+    </select>
+  </div>
+  <div class="col-sm-6 col-xl-2">
+    <div class="form-check mb-2">
+      <input id="admin-low-stock" type="checkbox" class="form-check-input" formControlName="lowStock" />
+      <label for="admin-low-stock" class="form-check-label">Solo stock bajo</label>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-2">
+    <button type="submit" class="btn btn-outline-secondary w-100">Filtrar</button>
+  </div>
+</form>
+
+@if (successMessage()) {
+  <div class="alert alert-success" role="status">{{ successMessage() }}</div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <p role="status">Cargando productos…</p>
+} @else if (products().length === 0) {
+  <p class="text-body-secondary py-4">No hay productos que coincidan con los filtros.</p>
+} @else {
+  <p class="text-body-secondary">{{ total() }} {{ total() === 1 ? 'producto' : 'productos' }}</p>
+
+  <!-- position-relative: keeps the hidden texts of the buttons inside the scroll area on small screens -->
+  <div class="table-responsive position-relative">
+    <table class="table align-middle bg-white">
+      <caption class="visually-hidden">Productos de la tienda, también los ocultos</caption>
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Foto</span></th>
+          <th scope="col">Producto</th>
+          <th scope="col" class="text-end">Precio</th>
+          <th scope="col">Stock</th>
+          <th scope="col">Estado</th>
+          <th scope="col"><span class="visually-hidden">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of products(); track product.id) {
+          <!-- Products with fewer than 5 units are highlighted, with text and not only colour (RF32) -->
+          <tr [class.table-warning]="product.lowStock">
+            <td style="width: 3.5rem">
+              @if (product.image) {
+                <img [src]="product.image" alt="" width="48" height="48" class="rounded border object-fit-contain bg-white" />
+              }
+            </td>
+            <td>
+              <a [routerLink]="['/admin/productos', product.id]" class="fw-semibold link-body-emphasis">{{ product.name }}</a>
+              <div class="small text-body-secondary">{{ product.categoryName }}</div>
+            </td>
+            <td class="text-end">{{ product.price | currency: 'EUR' }}</td>
+            <td style="min-width: 8rem">
+              <label [for]="'stock-' + product.id" class="visually-hidden">Stock de {{ product.name }}</label>
+              <input
+                #stockInput
+                [id]="'stock-' + product.id"
+                type="number"
+                class="form-control form-control-sm"
+                style="width: 5.5rem"
+                min="0"
+                max="99999"
+                [value]="product.stock"
+                (change)="changeStock(product, stockInput.value, stockInput)"
+              />
+              @if (product.lowStock) {
+                <span class="small fw-semibold">Stock bajo</span>
+              }
+            </td>
+            <td>
+              <span class="badge" [class]="product.isActive ? 'text-bg-success' : 'text-bg-secondary'">
+                {{ product.isActive ? 'Publicado' : 'Oculto' }}
+              </span>
+            </td>
+            <td class="text-end text-nowrap">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggleActive(product)">
+                {{ product.isActive ? 'Ocultar' : 'Publicar' }}<span class="visually-hidden"> {{ product.name }}</span>
+              </button>
+              <a [routerLink]="['/admin/productos', product.id]" class="btn btn-outline-secondary btn-sm ms-1">
+                Editar<span class="visually-hidden"> {{ product.name }}</span>
+              </a>
+              <button type="button" class="btn btn-outline-danger btn-sm ms-1" (click)="askDelete(product)">
+                Eliminar<span class="visually-hidden"> {{ product.name }}</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pages() > 1) {
+    <nav aria-label="Páginas de productos" class="d-flex align-items-center justify-content-center gap-3 mt-3">
+      <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+        Anterior
+      </button>
+      <span>Página {{ page() }} de {{ pages() }}</span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="page() === pages()" (click)="goToPage(page() + 1)">
+        Siguiente
+      </button>
+    </nav>
+  }
+}
+
+<app-confirm-dialog
+  #deleteDialog
+  title="Eliminar producto"
+  [message]="'¿Seguro que quieres eliminar «' + (productToDelete()?.name ?? '') + '»? Se borrarán también sus fotos y no se puede deshacer.'"
+  confirmLabel="Eliminar"
+  (confirmed)="deleteProduct()"
+/>
