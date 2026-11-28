@@ -1,0 +1,101 @@
+<h1 class="h2 mb-4">Pedidos</h1>
+
+<!-- Filters by status and dates (RF33) -->
+<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="row g-3 align-items-start mb-4" novalidate>
+  <div class="col-sm-6 col-lg-3">
+    <label for="order-status" class="form-label">Estado</label>
+    <select id="order-status" class="form-select" formControlName="status">
+      <option value="">Todos</option>
+      @for (value of statuses; track value) {
+        <option [value]="value">{{ status[value].label }}</option>
+      }
+    </select>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <label for="order-from" class="form-label">Desde</label>
+    <input
+      id="order-from"
+      type="date"
+      class="form-control"
+      formControlName="from"
+      [class.is-invalid]="isInvalid('from')"
+      [attr.aria-invalid]="isInvalid('from')"
+      [attr.aria-describedby]="isInvalid('from') ? 'order-from-error' : null"
+    />
+    @if (isInvalid('from')) {
+      <div id="order-from-error" class="invalid-feedback">{{ errorFor('from') }}</div>
+    }
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <label for="order-to" class="form-label">Hasta</label>
+    <input
+      id="order-to"
+      type="date"
+      class="form-control"
+      formControlName="to"
+      [class.is-invalid]="isInvalid('to')"
+      [attr.aria-invalid]="isInvalid('to')"
+      [attr.aria-describedby]="isInvalid('to') ? 'order-to-error' : null"
+    />
+    @if (isInvalid('to')) {
+      <div id="order-to-error" class="invalid-feedback">{{ errorFor('to') }}</div>
+    }
+  </div>
+  <div class="col-sm-6 col-lg-3 pt-sm-4 mt-sm-2">
+    <button type="submit" class="btn btn-outline-secondary w-100">Filtrar</button>
+  </div>
+</form>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <p role="status">Cargando pedidos…</p>
+} @else if (orders().length === 0) {
+  <p class="text-body-secondary py-4">No hay pedidos que coincidan con los filtros.</p>
+} @else {
+  <p class="text-body-secondary">{{ total() }} {{ total() === 1 ? 'pedido' : 'pedidos' }}</p>
+
+  <div class="table-responsive position-relative">
+    <table class="table align-middle bg-white">
+      <caption class="visually-hidden">Pedidos de la tienda, del más reciente al más antiguo</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Número de pedido</th>
+          <th scope="col">Cliente</th>
+          <th scope="col" class="text-end">Importe</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.orderNumber) {
+          <tr>
+            <td class="text-nowrap">{{ order.createdAt | date: 'd/M/y HH:mm' }}</td>
+            <td><a [routerLink]="['/admin/pedidos', order.orderNumber]">{{ order.orderNumber }}</a></td>
+            <td>
+              {{ order.customer?.name }}
+              <div class="small text-body-secondary">{{ order.customer?.email }}</div>
+            </td>
+            <td class="text-end">{{ order.total | currency: 'EUR' }}</td>
+            <!-- Colour and text, not only colour (RI12) -->
+            <td><span class="badge" [class]="status[order.status].badge">{{ status[order.status].label }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pages() > 1) {
+    <nav aria-label="Páginas de pedidos" class="d-flex align-items-center justify-content-center gap-3 mt-3">
+      <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+        Anterior
+      </button>
+      <span>Página {{ page() }} de {{ pages() }}</span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="page() === pages()" (click)="goToPage(page() + 1)">
+        Siguiente
+      </button>
+    </nav>
+  }
+}

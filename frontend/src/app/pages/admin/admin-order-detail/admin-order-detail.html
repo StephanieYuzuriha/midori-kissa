@@ -1,0 +1,150 @@
+<nav aria-label="Ruta de navegación">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink="/admin/pedidos">Pedidos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ order()?.orderNumber ?? 'Pedido' }}</li>
+  </ol>
+</nav>
+
+@if (successMessage()) {
+  <div class="alert alert-success" role="status">{{ successMessage() }}</div>
+}
+@if (errorMessage()) {
+  <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <p role="status">Cargando el pedido…</p>
+} @else if (notFound()) {
+  <h1 class="h3">Pedido no encontrado</h1>
+  <a routerLink="/admin/pedidos" class="btn btn-outline-secondary mt-2">Volver a pedidos</a>
+} @else {
+  @if (order(); as order) {
+    <h1 class="h2 mb-3">Pedido {{ order.orderNumber }}</h1>
+    <p class="mb-4">
+      Fecha: {{ order.createdAt | date: "d 'de' MMMM 'de' y, HH:mm" }} ·
+      Estado: <span class="badge" [class]="status[order.status].badge">{{ status[order.status].label }}</span>
+    </p>
+
+    <!-- Change of status (RF34) -->
+    <section class="card mb-4" aria-labelledby="status-title">
+      <div class="card-body">
+        <h2 id="status-title" class="h5 mb-3">Estado del pedido</h2>
+        @if (order.status === 'pending_payment') {
+          <!-- T16: add that the shop cancels it by itself when the payment is not completed (RF23) -->
+          <p>El pedido pasará a «Pagado» cuando se confirme el pago con Stripe.</p>
+        } @else if (order.status === 'paid') {
+          <p>Cuando prepares el envío, márcalo como enviado. Los pedidos pagados no se cancelan desde la tienda porque necesitarían un reembolso.</p>
+        } @else if (order.status === 'shipped') {
+          <p>Cuando el cliente lo reciba, márcalo como entregado.</p>
+        } @else {
+          <p class="mb-0">Este pedido ya no admite cambios de estado.</p>
+        }
+
+        <div class="d-flex flex-wrap gap-2">
+          @if (canChangeTo('shipped')) {
+            <button type="button" class="btn btn-primary" [disabled]="isChanging()" (click)="changeStatus('shipped')">Marcar como enviado</button>
+          }
+          @if (canChangeTo('delivered')) {
+            <button type="button" class="btn btn-primary" [disabled]="isChanging()" (click)="changeStatus('delivered')">Marcar como entregado</button>
+          }
+          @if (canChangeTo('cancelled')) {
+            <button type="button" class="btn btn-outline-danger" [disabled]="isChanging()" (click)="askCancel()">Cancelar pedido</button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-4">
+      <!-- Products, units and prices -->
+      <div class="col-lg-8">
+        <div class="table-responsive">
+          <table class="table align-middle bg-white">
+            <caption class="visually-hidden">Productos del pedido</caption>
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col" class="text-center">Cantidad</th>
+                <th scope="col" class="text-end">Precio</th>
+                <th scope="col" class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of order.items; track item.productId) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      @if (item.productImage) {
+                        <img [src]="item.productImage" alt="" width="48" height="48" class="rounded object-fit-contain" />
+                      }
+                      {{ item.productName }}
+                    </div>
+                  </td>
+                  <td class="text-center">{{ item.quantity }}</td>
+                  <td class="text-end">{{ item.unitPrice | currency: 'EUR' }}</td>
+                  <td class="text-end">{{ item.subtotal | currency: 'EUR' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colspan="3" class="text-end fw-normal">Subtotal</th>
+                <td class="text-end">{{ order.subtotal | currency: 'EUR' }}</td>
+              </tr>
+              <tr>
+                <th scope="row" colspan="3" class="text-end fw-normal">Envío</th>
+                <td class="text-end">{{ order.shippingCost === 0 ? 'Gratis' : (order.shippingCost | currency: 'EUR') }}</td>
+              </tr>
+              <tr>
+                <th scope="row" colspan="3" class="text-end">Total</th>
+                <td class="text-end fw-semibold">{{ order.total | currency: 'EUR' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Customer, shipping address and payment method -->
+      <div class="col-lg-4">
+        <section class="card mb-3" aria-labelledby="customer-title">
+          <div class="card-body">
+            <h2 id="customer-title" class="h6">Cliente</h2>
+            <p class="mb-0">
+              {{ order.customer?.name }}<br />
+              <a [href]="'mailto:' + order.customer?.email">{{ order.customer?.email }}</a>
+              @if (order.customer?.phone) {
+                <br />Teléfono: {{ order.customer?.phone }}
+              }
+            </p>
+          </div>
+        </section>
+        <section class="card mb-3" aria-labelledby="address-title">
+          <div class="card-body">
+            <h2 id="address-title" class="h6">Dirección de envío</h2>
+            <address class="mb-0">
+              {{ order.shipping.name }}<br />
+              {{ order.shipping.address }}<br />
+              {{ order.shipping.postalCode }} {{ order.shipping.city }} ({{ order.shipping.province }})<br />
+              Teléfono: {{ order.shipping.phone }}
+            </address>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="payment-title">
+          <div class="card-body">
+            <h2 id="payment-title" class="h6">Método de pago</h2>
+            <p class="mb-0">Tarjeta (Stripe)</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <a routerLink="/admin/pedidos" class="btn btn-outline-secondary mt-4">Volver a pedidos</a>
+  }
+}
+
+<app-confirm-dialog
+  #cancelDialog
+  title="Cancelar pedido"
+  [message]="'¿Seguro que quieres cancelar el pedido ' + (order()?.orderNumber ?? '') + '? Sus unidades volverán al stock y no se puede deshacer.'"
+  confirmLabel="Cancelar pedido"
+  (confirmed)="changeStatus('cancelled')"
+/>

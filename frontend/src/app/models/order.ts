@@ -26,6 +26,13 @@ export interface OrderItem {
   subtotal: number;
 }
 
+// Customer of the order, only in the admin panel
+export interface OrderCustomer {
+  name: string;
+  email: string;
+  phone?: string | null;
+}
+
 // Order as returned by the API (Order::toArray()). The list of orders comes without lines
 export interface Order {
   orderNumber: string;
@@ -36,6 +43,17 @@ export interface Order {
   total: number;
   shipping: ShippingData;
   items: OrderItem[];
+  // Only in the admin panel: the customer and the statuses the order can change to (RF34)
+  customer?: OrderCustomer;
+  nextStatuses?: OrderStatus[];
+}
+
+// One page of orders in the admin panel
+export interface OrderPage {
+  orders: Order[];
+  total: number;
+  page: number;
+  pages: number;
 }
 
 // Data sent to create an order: only product ids and units, the server sets the prices (RS15)
